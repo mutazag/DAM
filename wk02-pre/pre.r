@@ -86,3 +86,21 @@ coplot(
 ? pairs
 col_pairs <- c("mpg", "cyl", "disp", "qsec")
 pairs(data[,col_pairs], main = "mtcars data")
+
+
+
+## plotting diamonds 
+
+diamonds_colnames <- colnames(diamonds)
+coplot(
+  formula = price ~ x | as.factor(clarity), 
+  data= diamonds, 
+  panel = panel.smooth, 
+  rows=1
+  
+)
+
+
+pairs(diamonds[, diamonds_colnames[c(6,8,9,10,11)]])
+
+hist(diamonds$price)
