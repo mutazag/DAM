@@ -1,3 +1,5 @@
+# Activities for Week 2 (19 Mar 2018)
+
 #load diamonds.csv
 list.files()
 
