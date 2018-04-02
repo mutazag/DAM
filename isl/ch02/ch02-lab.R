@@ -160,6 +160,7 @@ hist(mpg, col=2, breaks = 15)
 pairs(Auto)
 pairs( ~ mpg + displacement + horsepower + weight + acceleration, Auto)
 plot(horsepower, mpg)
+
 identify(horsepower, mpg, name) # iteractive plot to identify observations 
 
 
