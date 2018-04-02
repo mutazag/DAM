@@ -91,3 +91,21 @@ fa = (f-t(f))/2
 contour(x1,y1,fa, nlevels=15)
 image(x1,y1,fa, theta = 30) #heatmap
 plot(x1,y1)
+
+
+# 2.3.3 indexing data 
+
+A <- matrix(1:16, 4,4)
+A[2,3]
+
+A[c(1,3), c(2,4)] # subsetting rows 1,3 and col 2,4 
+
+A[1:2,] # rows 1,2
+
+A[,1:2] # cols 1,2
+
+A[1,] # one observation (row)
+
+A[-c(2,3), ] # omit rows 2,3
+
+dim(A) # dimensions of A
