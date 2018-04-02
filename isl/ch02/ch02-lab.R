@@ -52,3 +52,42 @@ cor(xs,ys) # cor == 1 as seeding was used on both random number vectors
 mean(ys)
 var(ys)
 sqrt(var(ys)) == sd(ys)
+
+# 2.3.2 Graphics 
+
+#scatter plot 
+plot(xs,ys)
+plot(x1,y1, 
+     xlab="this is the x-axis", 
+     ylab = "this is the y-axis",
+     main="plot of X vs Y", col = "green")
+
+# output to pdf or jpeg ?dev.off
+pdf("x vs y.pdf")
+plot(x1,y1, 
+     xlab="this is the x-axis", 
+     ylab = "this is the y-axis",
+     main="plot of X vs Y", col = "green")
+dev.off()
+list.files()
+
+
+
+# sequence function 
+
+xseq <- seq(1,10)
+xseq2 <- 1:10
+xseq == xseq2
+piseq <- seq(-pi, pi, length=50)
+plot(piseq)
+
+
+# plot countor 
+x1 <- seq(100)
+y1 <- seq(100)
+f = outer(x1,y1,function(x1,y1){cos(y1)/(1+x1^2)})
+contour(x1,y1,f, nlevels = 45, add = T)
+fa = (f-t(f))/2
+contour(x1,y1,fa, nlevels=15)
+image(x1,y1,fa, theta = 30) #heatmap
+plot(x1,y1)
