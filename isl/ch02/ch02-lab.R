@@ -127,3 +127,37 @@ fix(Auto)
 Auto <- read.table("Auto.data", header = TRUE, na.strings = "?")
 fix(Auto)
 dim(Auto) # 397 obs 9 cols
+
+# omit missing data 
+Auto <- na.omit(Auto)
+dim(Auto) # 5 rows with missing data were omitted
+names(Auto) # variables (columns) names
+
+
+# 2.3.5 graphics and stats 
+
+plot(Auto$cylinders, Auto$mpg)
+
+# attach data set before plotting
+attach(Auto)
+plot(cylinders, mpg) # ploting cyl as numeric -> scatter plot
+cylinders <- as.factor(cylinders)
+plot(cylinders,
+     mpg,
+     col = "red", 
+     varwidth=TRUE, 
+     xlab = "cyliders", 
+     ylab = "mpg", 
+     main = "plot cyl vs mpg") # plotting cyl as factor -> boxplot
+
+
+#hist plot 
+attach(Auto)
+hist(mpg)
+hist(mpg, col=2, breaks = 15)
+
+# scatter plot matrix using pair 
+pairs(Auto)
+pairs( ~ mpg + displacement + horsepower + weight + acceleration, Auto)
+plot(horsepower, mpg)
+identify(horsepower, mpg, name) # iteractive plot to identify observations 
