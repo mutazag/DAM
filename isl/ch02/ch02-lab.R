@@ -161,3 +161,10 @@ pairs(Auto)
 pairs( ~ mpg + displacement + horsepower + weight + acceleration, Auto)
 plot(horsepower, mpg)
 identify(horsepower, mpg, name) # iteractive plot to identify observations 
+
+
+
+# stats 
+# summary
+summary(Auto)
+summary(mpg)
