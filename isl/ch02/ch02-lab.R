@@ -109,3 +109,21 @@ A[1,] # one observation (row)
 A[-c(2,3), ] # omit rows 2,3
 
 dim(A) # dimensions of A
+
+
+# 2.3.4 loading data 
+# load auto data 
+
+# download from ISL
+download.file(url="http://www-bcf.usc.edu/~gareth/ISL/Auto.data", 
+              destfile = file.path("Auto.data"))
+list.files()
+#load data
+Auto <- read.table("Auto.data")
+#display data in a sheet
+fix(Auto)
+
+#load with headers
+Auto <- read.table("Auto.data", header = TRUE, na.strings = "?")
+fix(Auto)
+dim(Auto) # 397 obs 9 cols
