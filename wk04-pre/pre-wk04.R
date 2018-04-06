@@ -94,3 +94,60 @@ ggplot(data = diamonds,
 ggplot(data = diamonds, 
        aes(x = carat, y = price, color = cut)) + geom_point() +
        facet_wrap( ~ clarity) + geom_smooth(method="auto") 
+
+
+
+### Shiny 
+
+install.packages("shiny")
+library(shiny)
+library(ggplot2)
+
+
+
+
+# first define the ui function 
+
+ui <- shinyUI(bootstrapPage(
+  # create simple selection 
+  selectInput(inputId = "variable", 
+              label = "Select a variable to overlay", 
+              choices = c("clarity", "cut", "color"), 
+              selected = "clarity"),
+  
+  # select geometry to use 
+  selectInput(inputId = "geometry", 
+              label = "select a geometry", 
+              choices = c("density", "histogram")), 
+  
+  # display a plot , defined on server 
+  plotOutput(outputId = "main_plot")
+))
+
+
+# define the server function 
+server <- shinyServer(function(input, output){
+  # create a plot and pass to the ui 
+  output$main_plot = renderPlot({
+    # filter the data frame 
+    data <- diamonds[, c("price", input$variable)]
+    #define the base plot 
+    plot <- qplot (x = price, data = data, geom = input$geometry, 
+                   fill = data[,2], alpha=I(0.25))
+    plot
+  })
+})
+
+# call the shinyApp 
+shinyApp(ui, server)
+
+
+
+
+
+
+
+
+
+
+
