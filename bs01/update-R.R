@@ -1,0 +1,4 @@
+# updating R 
+
+if(!require(installr)) { install.packages("installr"); require(installr) } 
+updateR() 
