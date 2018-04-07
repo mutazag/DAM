@@ -34,6 +34,10 @@ print(docs)
 #Patience, this might take a while....
 inspect(docs[1])
 
+
+
+# call get transformations to inspect the available transformations in tm_map
+getTransformations()
 #Remove punctuation - replace punctuation marks with " "
 docs <- tm_map(docs, removePunctuation)
 #Transform to lower case
@@ -46,11 +50,15 @@ docs <- tm_map(docs, removeWords, stopwords("english"))
 docs <- tm_map(docs, stripWhitespace)
 #inspect output
 writeLines(as.character(docs[[30]]))
+
+
+
 #Stem document
-##########################
-##WARNING!!! - Mac users may want to avoid running stemDocument as it can give an
-##error and corrupt the corpus.
 docs <- tm_map(docs,stemDocument)
+
+
+
+
 #########################
 #some clean up
 ##NOTE: you will need to change the replacements appropriately if you do not stem!!
@@ -65,32 +73,62 @@ docs <- tm_map(docs, content_transformer(gsub),
 docs <- tm_map(docs, content_transformer(gsub),
                pattern = "team-", replacement = "team")
 #end clean up
+
+
+
 #inspect
 writeLines(as.character(docs[[30]]))
+
+
+
 #Create document-term matrix
 dtm <- DocumentTermMatrix(docs)
+
+
+
 #summary
 dtm
 #inspect segment of document term matrix
 inspect(dtm[1:2,1000:1005])
+inspect(dtm[1:5, 200:210])
+
+
 #collapse matrix by summing over columns - this gets total counts (over all docs) for each term
 freq <- colSums(as.matrix(dtm))
+
+
 #length should be total number of terms
 length(freq)
+
+
+
 #create sort order (asc)
 ord <- order(freq,decreasing=TRUE)
+
+
+
 #inspect most frequently occurring terms
 freq[head(ord)]
+
+
 #write to disk and inspect file
 write.csv(file="freq.csv",freq[ord])
 #inspect least frequently occurring terms
 freq[tail(ord)]
+
+
 #list most frequent terms. Lower bound specified as second argument
 findFreqTerms(dtm,lowfreq=80)
+
+
+
 #correlations
 findAssocs(dtm,"project",0.6)
 findAssocs(dtm,"enterpris",0.7)
 findAssocs(dtm,"system",0.7)
+
+
+
 #histogram
 library(ggplot2)
 wf=data.frame(term=names(freq),occurrences=freq)
@@ -103,6 +141,9 @@ p <- ggplot(subset(wf, occurrences>100), aes(reorder(term,occurrences), occurren
 p <- p + geom_bar(stat="identity")
 p <- p + theme(axis.text.x=element_text(angle=45, hjust=1))
 p
+
+
+
 #wordcloud
 library(wordcloud)
 #setting the same seed each time ensures consistent look across clouds
@@ -132,11 +173,16 @@ myStopwords <- c("can", "say","one","way","use",
                   "enough","far","earli","away","achiev","draw",
                   "last","never","brief","bit","entir","brief",
                   "great","lot")
+
 docs <- tm_map(docs, removeWords, myStopwords)
+
+
 #remove very frequent and very rare words
 dtmr <-DocumentTermMatrix(docs, control=list(wordLengths=c(4, 20),
                                              bounds = list(global = c(3,27))))
 freqr <- colSums(as.matrix(dtmr))
+
+
 #length should be total number of terms
 length(freqr)
 #create sort order (asc)
