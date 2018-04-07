@@ -15,12 +15,18 @@
 
 library(tm)
 docs <- Corpus(DirSource("./docs"))
-#Mac users only!!
-#docs <- tm_map(docs, function(x) iconv(x, to='UTF-8-MAC', sub='byte'))
+
+
 #Check number of docs loaded
 print(docs)
+
 #inspect a particular document
 writeLines(as.character(docs[[30]]))
+
+
+#### preprocessing 
+##
+#
 #Remove punctuation - replace punctuation marks with " "
 docs <- tm_map(docs, removePunctuation)
 #Transform to lower case
@@ -35,6 +41,8 @@ docs <- tm_map(docs, stripWhitespace)
 writeLines(as.character(docs[[30]]))
 #Stem document
 docs <- tm_map(docs,stemDocument)
+
+
 #some clean up
 docs <- tm_map(docs, content_transformer(gsub),
                pattern = "organiz", replacement = "organ")
@@ -46,28 +54,69 @@ docs <- tm_map(docs, content_transformer(gsub),
                pattern = "inenterpris", replacement = "enterpris")
 docs <- tm_map(docs, content_transformer(gsub),
                pattern = "team-", replacement = "team")
+
 #inspect
 writeLines(as.character(docs[[30]]))
+
+
 #Create document-term matrix
 dtm <- DocumentTermMatrix(docs)
+
+
+
+######  Clustering 
+#####
+###
+#
+
 ## start clustering specific code
 #convert dtm to matrix (what format is the dtm stored in?)
-m<-as.matrix(dtm)
+m<-as.matrix(dtm)    ## m has 30 rows (docs) and 3742 cols (for the terms)
+
+
+m[, 200:210]
+
 #write as csv file
 write.csv(m,file="dtmAsMatrix.csv")
+
+
 #shorten rownames for display purposes
+rownames(m)
 rownames(m) <- paste(substring(rownames(m),1,3),rep("..",nrow(m)),
                      substring(rownames(m),
                                nchar(rownames(m))-12,nchar(rownames(m))-4))
+
+
+
 #compute distance between document vectors
-d <- dist(m)
+d <- dist(m, method="euclidean")
+
+
 #run hierarchical clustering using Ward's method (explore other options later)
 groups <- hclust(d,method="ward.D")
+
+
+class(dist)         ## -> distance matrix
+class(groups)       ## -> hclust 
+
 #plot, use hang to ensure that labels fall below tree
 plot(groups, hang=-1)
-#cut into 2 subtrees. Try 3,4,5,6 cuts; comment on your results
-rect.hclust(groups,2)
 
+#cut into 2 subtrees. Try 3,4,5,6 cuts; comment on your results
+rect.hclust(groups,2) ## << show the second level seperation 
+rect.hclust(groups,3)   ## show the third level seperation ... produces very small clusters maybe not great
+
+
+
+
+
+
+#######
+######
+#####
+###
+##
+#
 #try another distance measure
 cosineSim <- function(x){
   as.dist(x%*%t(x)/(sqrt(rowSums(x^2) %*% t(rowSums(x^2)))))
