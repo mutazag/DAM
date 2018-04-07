@@ -4,7 +4,7 @@
 # wordcloud
 
 
-pkgs <- c("tm", "SnowballC", "ggplot2", "wordcloud")
+pkgs <- c("tm", "SnowballC", "ggplot2", "wordcloud", "igraph")
 install.packages(pkgs)
 
 
