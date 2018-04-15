@@ -133,7 +133,7 @@ server <- shinyServer(function(input, output){
     data <- diamonds[, c("price", input$variable)]
     #define the base plot 
     plot <- qplot (x = price, data = data, geom = input$geometry, 
-                   fill = data[,2], alpha=I(0.25))
+                   fill = data[,2], alpha=I(0.25)) + scale_fill_discrete(input$variable)
     plot
   })
 })
