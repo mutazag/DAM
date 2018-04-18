@@ -55,7 +55,18 @@ ggplot( freq_100, aes(term, count)) +
   ggtitle("Top Terms in Documents")
 
 
+# bottom terms 25 to 50
+freq_low50 <- termFreq[termFreq$count >= 25 & termFreq$count <= 50, ]
+ord <- order(freq_low50$count, decreasing = F)
+freq_low50$term <- factor(freq_low50$term, levels = freq_low50$term[ord])
 
+ggplot( freq_low50, aes(term, count)) + 
+  geom_bar(stat="identity", aes(fill=count)) +
+  theme(axis.text.x = element_text(angle=90)) +
+  ggtitle("Terms in the middle of the scale")
+## this turned out to be a bad idea as it is too crowded to show anything
+## and besides this approach is not sustainable, a better approach is use
+## some clustering techniques or topic modeling
 
 # word count visualisations 
 library(wordcloud)
