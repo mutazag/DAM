@@ -39,6 +39,11 @@ termFreq <- colSums(as.matrix(dtm))
 termFreq <- data.frame(term=names(termFreq), count=termFreq)
 
 
+# peroform stemCompletion on Terms 
+dict <- Corpus(DirSource("docs"))
+dict <- tm_map(dict, removePunctuation)
+termFreq$termComplete <- stemCompletion(termFreq$term,dictionary = dict)
+
 ## bar chart to show high freq terms 
 library(ggplot2)
 library(RColorBrewer)
@@ -48,11 +53,19 @@ freq_100 <- termFreq[termFreq$count>100,]
 ord <- order(freq_100$count, decreasing = T)
 # reorder freq_100 in descending order, good for plotting
 freq_100$term <- factor(freq_100$term, levels = freq_100$term[ord])
+freq_100$termComplete <- factor(freq_100$termComplete, levels = freq_100$termComplete[ord])
 
+
+# plotting the stemmed term and completed terms
 ggplot( freq_100, aes(term, count)) + 
   geom_bar(stat="identity", aes(fill=count)) +
   theme(axis.text.x = element_text(angle=90)) +
   ggtitle("Top Terms in Documents")
+
+ggplot( freq_100, aes(termComplete, count)) + 
+  geom_bar(stat="identity", aes(fill=count)) +
+  theme(axis.text.x = element_text(angle=90)) +
+  ggtitle("Top Terms in Documents", subtitle = "Stem Completed")
 
 
 # bottom terms 25 to 50
@@ -72,4 +85,5 @@ ggplot( freq_low50, aes(term, count)) +
 library(wordcloud)
 set.seed(1234)  # ensure consistent look everytime code is run
 wordcloud(freq_100$term, freq_100$count, colors =  brewer.pal(8,"Dark2"))
+wordcloud(freq_100$termComplete, freq_100$count, colors =  brewer.pal(8,"Dark2"))
   
