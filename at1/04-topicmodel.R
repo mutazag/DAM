@@ -148,4 +148,6 @@ topic2term_6
 # topic 5: knowledge and issues! 
 # topic 6: data modeling techniques
 
-
+# next, will run some clustring on the content and try to 
+# determine an optimal number of clusters (WSS technique)
+# to see what would it indicate as optimal cluster K value
