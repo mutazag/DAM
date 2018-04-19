@@ -11,3 +11,5 @@
 library(tm)
 rm(list = ls())  # cleanup env 
 setwd("c:/mdsi/dam/at1")  # set working directory
+
+
