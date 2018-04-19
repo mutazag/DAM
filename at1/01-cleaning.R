@@ -9,6 +9,7 @@
 ## Library
 
 library(tm)
+library(textstem)
 rm(list = ls())  # cleanup env 
 
 ## load mycorpus and get basic metadata

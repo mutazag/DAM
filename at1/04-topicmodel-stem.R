@@ -153,3 +153,7 @@ topic2term_6
 # next, will run some clustring on the content and try to 
 # determine an optimal number of clusters (WSS technique)
 # to see what would it indicate as optimal cluster K value
+
+
+# Calculating perplixty (time-permitting)
+# perplexity()

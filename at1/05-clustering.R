@@ -136,6 +136,9 @@ wordCloudForCluster <- function(clust, k, dtm_m){
   }
 }
 
+
+## run the plotting function on all three clusters with k = 4 to examine their
+## dendograms and word clouds of the groups in the cluster
 wordCloudForCluster(clust = h_clust_euc, k = 4, dtm_m = mydtm_m)
 wordCloudForCluster(clust = h_clust_cos, k = 4, dtm_m = mydtm_m)
 wordCloudForCluster(clust = h_clust_man, k = 4, dtm_m = mydtm_m)
