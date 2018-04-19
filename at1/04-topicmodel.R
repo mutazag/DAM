@@ -73,8 +73,39 @@ ldaout <- LDA(dtm,
 
 # get the document to topic mapping
 ldaout.topics <- as.matrix(topics(ldaout))
+ldaout.topics <- data.frame(filename = rownames(ldaout.topics), topic = ldaout.topics)
+
 # top 6 terms in each topic
 ldaout.terms <- as.matrix(terms(ldaout,6))
+
 # topic assignment probablities 
 ldaout.topicProbabilities <- as.data.frame(ldaout@gamma)
 rownames(ldaout.topicProbabilities) <- filenames
+
+
+
+# Calculating relative importance of topics in a document
+# sort topic probabilities and then compare p(k) element (highest)
+# and p(k-1) element (second highest), and then second highest
+# with the third highest p(k-2)
+# p(k)/p(k-1) and p(k-1)/p(k-2)
+
+sort(ldaout.topicProbabilities[1,])[k]
+sort(ldaout.topicProbabilities[1,])[k-1]
+sort(ldaout.topicProbabilities[1,])[k-2]
+
+topic1ToTopic2 <- lapply(1:nrow(ldaout.topicProbabilities), function(i, tp, k){
+      return (sort(tp[i,])[k]/sort(tp[i,])[k-1])
+    }, 
+    ldaout.topicProbabilities,
+    k)
+topic2ToTopic3 <- lapply(1:nrow(ldaout.topicProbabilities), function(i, tp, k){
+    return (sort(tp[i,])[k-1]/sort(tp[i,])[k-2])
+    }, 
+    ldaout.topicProbabilities,
+    k)
+
+topic2topic <- data.frame(filename = filenames, 
+                          topic1ToTopic2 = unlist(topic1ToTopic2), 
+                          topic2ToTopic3 = unlist(topic2ToTopic3))
+
