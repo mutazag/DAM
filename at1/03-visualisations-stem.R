@@ -4,13 +4,13 @@
 ## Mutaz Abu Ghazaleh 
 ## 13184383
 ##
-## Visualisations
+## Visualisations - on stemmed corpus
 
 ## Library
 
 library(tm)
 rm(list = ls())  # cleanup env 
-
+setwd("c:/mdsi/dam/at1")
 ## load mycorpus and get basic metadata
 
 setwd("c:/mdsi/dam/at1")
