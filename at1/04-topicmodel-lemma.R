@@ -4,7 +4,7 @@
 ## Mutaz Abu Ghazaleh 
 ## 13184383
 ##
-## Topic Modeling
+## Topic Modeling - lemma
 
 ## Library
 
@@ -14,7 +14,7 @@ rm(list = ls())  # cleanup env
 ## load mycorpus and get basic metadata
 
 setwd("c:/mdsi/dam/at1")
-docs_folder <- "stem"
+docs_folder <- "lemma"
 docs <- Corpus(DirSource(docs_folder, encoding = "UTF-8"))
 
 num_docs <- length(docs)
@@ -113,11 +113,13 @@ topicModelingLDA <- function(dtm, k, ctrl){
   
   
   ## save outputs to files
-  
-  write.csv(ldaout.topics, file=paste0("lda-",k,"-DocsToTopics.csv"), row.names = F)
-  write.csv(ldaout.terms, file=paste0("lda-",k,"-TopicsToTerms.csv"))
-  write.csv(ldaout.topicProbabilities, file=paste0("lda-",k,"-TopicProbablities.csv"), row.names = F)
-  write.csv(topic2topic, file=paste0("lda-",k,"-Topic1to2_2to3.csv"))
+  folder <- paste0("topicmodel-",docs_folder) # note to self: reaching out to a global variable - dont
+
+  if (!file.exists(folder)) { dir.create(file.path(".", folder))}
+  write.csv(ldaout.topics, file=paste0("./",folder,"/lda-",k,"-DocsToTopics.csv"), row.names = F)
+  write.csv(ldaout.terms, file=paste0("./",folder,"/lda-",k,"-TopicsToTerms.csv"))
+  write.csv(ldaout.topicProbabilities, file=paste0("./",folder,"/lda-",k,"-TopicProbablities.csv"), row.names = F)
+  write.csv(topic2topic, file=paste0("./",folder,"/lda-",k,"-Topic1to2_2to3.csv"))
 }
 
 
