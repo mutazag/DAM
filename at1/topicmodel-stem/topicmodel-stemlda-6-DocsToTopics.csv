@@ -1,35 +1,35 @@
-"filename","topic"
-"Doc01.txt",2
-"Doc02.txt",4
-"Doc03.txt",6
-"Doc04.txt",4
-"Doc05.txt",4
-"Doc06.txt",4
-"Doc07.txt",4
-"Doc08.txt",6
-"Doc09.txt",4
-"Doc10.txt",6
-"Doc11.txt",5
-"Doc12.txt",5
-"Doc13.txt",5
-"Doc14.txt",5
-"Doc15.txt",5
-"Doc16.txt",5
-"Doc17.txt",5
-"Doc18.txt",6
-"Doc19.txt",1
-"Doc20.txt",1
-"Doc21.txt",1
-"Doc22.txt",1
-"Doc23.txt",3
-"Doc24.txt",3
-"Doc25.txt",3
-"Doc26.txt",3
-"Doc27.txt",3
-"Doc28.txt",3
-"Doc29.txt",3
-"Doc30.txt",4
-"Doc31.txt",3
-"Doc32.txt",3
-"Doc33.txt",2
-"Doc34.txt",2
+Topic ID,filename,Topic Description,,,,,
+2,Doc01.txt,Topic 2: best practice discussion,,,,,
+4,Doc02.txt,Topic 4: project/risk management,,,,,
+6,Doc03.txt, Topic 6: data modelling techniques,,,,,
+4,Doc04.txt,Topic 4: project/risk management,,,,ID,Topic
+4,Doc05.txt,Topic 4: project/risk management,,,,1,Topic 1: term clustering
+4,Doc06.txt,Topic 4: project/risk management,,,,2,Topic 2: best practice discussion
+4,Doc07.txt,Topic 4: project/risk management,,,,3,Topic 3: organisation change management
+6,Doc08.txt, Topic 6: data modelling techniques,,,,4,Topic 4: project/risk management
+4,Doc09.txt,Topic 4: project/risk management,,,,5,Topic 5: knowledge and issues
+6,Doc10.txt, Topic 6: data modelling techniques,,,,6, Topic 6: data modelling techniques
+5,Doc11.txt,Topic 5: knowledge and issues,,,,,
+5,Doc12.txt,Topic 5: knowledge and issues,,,,,
+5,Doc13.txt,Topic 5: knowledge and issues,,,,,
+5,Doc14.txt,Topic 5: knowledge and issues,,,,,
+5,Doc15.txt,Topic 5: knowledge and issues,,,,,
+5,Doc16.txt,Topic 5: knowledge and issues,,,,,
+5,Doc17.txt,Topic 5: knowledge and issues,,,,,
+6,Doc18.txt, Topic 6: data modelling techniques,,,,,
+1,Doc19.txt,Topic 1: term clustering,,,,,
+1,Doc20.txt,Topic 1: term clustering,,,,,
+1,Doc21.txt,Topic 1: term clustering,,,,,
+1,Doc22.txt,Topic 1: term clustering,,,,,
+3,Doc23.txt,Topic 3: organisation change management,,,,,
+3,Doc24.txt,Topic 3: organisation change management,,,,,
+3,Doc25.txt,Topic 3: organisation change management,,,,,
+3,Doc26.txt,Topic 3: organisation change management,,,,,
+3,Doc27.txt,Topic 3: organisation change management,,,,,
+3,Doc28.txt,Topic 3: organisation change management,,,,,
+3,Doc29.txt,Topic 3: organisation change management,,,,,
+4,Doc30.txt,Topic 4: project/risk management,,,,,
+3,Doc31.txt,Topic 3: organisation change management,,,,,
+3,Doc32.txt,Topic 3: organisation change management,,,,,
+2,Doc33.txt,Topic 2: best practice discussion,,,,,
+2,Doc34.txt,Topic 2: best practice discussion,,,,,
