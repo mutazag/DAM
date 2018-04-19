@@ -110,7 +110,17 @@ saveCorpToDisk(docs, "temp4", filenames)
 
 ## steming document 
 # save outcome to stem to use as a starting point for further
-docs <- tm_map(docs, stemDocument)
-saveCorpToDisk(docs, "stem", filenames)
+stemdocs <- tm_map(docs, stemDocument)
+saveCorpToDisk(stemdocs, "stem", filenames)
+
+## lemmatise document
 
 
+lemmaTransform <- content_transformer(
+  function(x){
+    return (lemmatize_strings(x))
+  }
+)
+
+lemmadocs <- tm_map(docs, lemmaTransform)
+saveCorpToDisk(lemmadocs, "lemma", filenames)
