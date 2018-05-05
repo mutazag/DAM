@@ -23,7 +23,7 @@ ggplot(data_frame(x,y), aes(x,y)) + geom_point() + geom_smooth(method="loess", s
 
 # https://stats.stackexchange.com/questions/232548/r-how-are-the-significance-codes-determined-when-summarizing-a-logistic-regres
 
-fit <- lm (y~x, data=data_frame(x,y))
+fit <- lm (y~x+x2, data=data_frame(x,x2=x^2,y))
 summary(fit)
 
 
@@ -38,3 +38,15 @@ library(caret)
 varImp(fit, scale=FALSE)
 # the higher the value the more impact it has Overall 1 14.45215 this will
 # probably make more sense when doing multiplw linear regresion
+
+
+
+# make predictions
+
+prediction <- predict(fit)
+prediction
+predicted_df <- data_frame(x, y = prediction)
+predicted_df
+
+ggplot(predicted_df, aes(x,y))+ geom_point()
+plot(x = x, y = (x^2))
