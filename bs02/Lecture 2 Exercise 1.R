@@ -18,7 +18,7 @@ str(data)
 
 # plot all the variables against data, four plots in a grid
 # You might want to take note of this code, it can come in handy!
-par(mfrow = c(3,3))
+# par(mfrow = c(3,3))
 counter = 0
 for (variable in colnames(data[, -1])) {
   plot(data[, variable], data$Sales, main = variable, ylab = "sales", xlab = variable)
@@ -27,6 +27,7 @@ for (variable in colnames(data[, -1])) {
     readline(prompt = "Hit ENTER to show more plots")
   }
 }
+
 
 
 
@@ -40,7 +41,7 @@ for (variable in colnames(data[, -1])) {
 ###
 ####
 
-par(mfrow = c(2,4))
+# par(mfrow = c(2,4))
 # Train a linear regression model on all the predictors (using '.' in the formula does this)
 data.lm = lm(formula = Sales ~., data = data)
 
@@ -76,6 +77,8 @@ plot(data.lm2)
 # 2 discover interaction terms by checking corrlation between different terms
 ## http://www.sthda.com/english/wiki/correlation-matrix-a-quick-start-guide-to-analyze-format-and-visualize-a-correlation-matrix-using-r-software
 
+
+
 library(dplyr)
 
 drop_cols <- c("Urban", "US","ShelveLoc")
@@ -87,6 +90,12 @@ corrs <- round(cor(my_data),2)
 library(corrplot)
 par(mfrow=c(1,1))
 corrplot(corrs, type="upper", order="hclust", tl.col="black", tl.srt=45)
+
+# another way t look at importance is to use the verImp in caret library 
+library(caret)
+varImp(data.lm2, scale=FALSE)
+# the higher the value the more impact it has Overall 1 14.45215 this will
+# probably make more sense when doing multiplw linear regresion
 
 
 # > corrs
@@ -128,5 +137,8 @@ data.lm3.price_compprice = lm(formula = Sales ~ Income + Advertising +
               data = data3)
 summary(data.lm3.price_compprice)
 plot(data.lm3.price_compprice)
+
+
+
 
 # Adj R-sqr dropped to 0.87 <- not a good move 
