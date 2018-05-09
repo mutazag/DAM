@@ -93,6 +93,7 @@ corrplot(corrs, type="upper", order="hclust", tl.col="black", tl.srt=45)
 
 # another way t look at importance is to use the verImp in caret library 
 library(caret)
+
 varImp(data.lm2, scale=FALSE)
 # the higher the value the more impact it has Overall 1 14.45215 this will
 # probably make more sense when doing multiplw linear regresion
@@ -127,7 +128,7 @@ attach(data)
 PRICEc <- Price - mean(Price)
 COMPPRICEc <- CompPrice - mean(CompPrice)
 #step 2: multiply the input variables
-PriceComPrice <- Price * ComPrice
+PriceComPrice <- Price * CompPrice
 
 detach(data)
 data3 <- data %>% mutate(PriceComPrice)

@@ -160,3 +160,4 @@ confusionMatrix(data = testing$prediction2, testing$Purchase)
 #         MM  22  92
 # Pos Pred Value : 0.8398          
 # Neg Pred Value : 0.8070    
+
