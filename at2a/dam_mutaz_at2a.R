@@ -33,6 +33,18 @@ df$industry <- as.factor(df$industry)
 df$location <- as.factor(df$location)
 df %>% select(industry, location) %>% summary()
 
+# look for number of observations per industry/location 
+df %>%
+  group_by(industry, location) %>%
+  summarise(N = n()) %>% 
+  spread(location, N) 
+
+
+df %>%
+  group_by(industry, location) %>%
+  summarise(N = n()) %>% 
+  ggplot(aes(x=location, y=industry)) + geom_point()
+
 df %>% group_by(industry) %>% 
   summarize(industry_total = sum(monthly_amount), industry_mean = mean(monthly_amount)) %>%
   ggplot(aes(x=industry, y=industry_total)) + geom_bar(stat="identity") +
