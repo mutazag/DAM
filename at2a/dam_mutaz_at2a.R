@@ -45,6 +45,8 @@ df %>%
   summarise(N = n()) %>% 
   ggplot(aes(x=location, y=industry)) + geom_point()
 
+## insight: industry 6 has data in one location only 1, and the following
+## industry/locaiton combinations also have missing data: 10/6, 9/8
 df %>% group_by(industry) %>% 
   summarize(industry_total = sum(monthly_amount), industry_mean = mean(monthly_amount)) %>%
   ggplot(aes(x=industry, y=industry_total)) + geom_bar(stat="identity") +
