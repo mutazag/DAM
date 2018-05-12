@@ -11,11 +11,18 @@
 #set working directory if needed (modify path as needed)
 #setwd("C:/Users/Kailash/Documents/dam_lecture_3")
 #load required libraries - rpart for classification and regression trees
+
+
+
+setwd("c:/mdsi/dam/bs03")
 library(rpart)
 #mlbench for Glass dataset
 library(mlbench)
 #load Glass
 data("Glass")
+
+
+#### split training data ####
 #set seed to ensure reproducible results
 set.seed(42)
 #split into training and test sets
@@ -30,6 +37,10 @@ trainGlass <- trainGlass[,-trainColNum]
 testGlass <- testGlass[,-trainColNum]
 #get column index of predicted variable in dataset
 typeColNum <- grep("Type",names(Glass))
+
+
+#### create a tree model using rpart ####
+
 #build model
 rpart_model <- rpart(Type ~.,data = trainGlass, method="class")
 #plot tree
@@ -39,10 +50,15 @@ rpart_predict <- predict(rpart_model,testGlass[,-typeColNum],type="class")
 mean(rpart_predict==testGlass$Type)
 
 
+#### random forest ####
+
 library(randomForest)
 data("Glass")
+
+###### random forest - training set ######
 set.seed(42)
 Glass[,"train"] <- ifelse(runif(nrow(Glass))<0.8,1,0)
+
 #write dataframe to disk to check
 #write.csv(Glass,"Glass.csv")
 #separate training and test sets
@@ -52,6 +68,8 @@ trainColNum <- grep("train",names(trainGlass))
 typeColNum <- grep("Type",names(Glass))
 trainGlass <- trainGlass[,-trainColNum]
 testGlass <- testGlass[,-trainColNum]
+
+#### build a random forest model ####
 #Build random forest model
 Glass.rf <- randomForest(Type ~.,data = trainGlass, 
                        importance=TRUE, xtest=testGlass[,-typeColNum],ntree=1000)
