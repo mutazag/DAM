@@ -16,6 +16,7 @@ library(rpart.plot)
 library(mlbench)
 #setwd("C:/Users/Kailash/Documents/decisiontrees")
 
+setwd("c:/mdsi/dam/bs03")
 #Load Ionosphere  dataset (classification problem)
 data("Ionosphere")
 #Explore dataset
@@ -25,22 +26,41 @@ ncol(Ionosphere)
 summary(Ionosphere)
 #create training and test sets
 set.seed(42)
-Ionosphere[,"train"] <- ifelse(runif(nrow(Ionosphere))<0.8,1,0)
+Ionosphere[,"train"] <- ifelse(runif(nrow(Ionosphere))<0.8,1,0) 
+## or use CARET package to create training data and k-folds is part of that.
+
+
 #write dataframe to disk to check
 write.csv(Ionosphere,"Ionosphere.csv")
 #separate training and test sets
 trainset <- Ionosphere[Ionosphere$train==1,]
 testset <- Ionosphere[Ionosphere$train==0,]
+# this is just to get the columnnumber for the train flag so it can be removed
+# later on form the train and test adata sets to avoid using it in the model
+# fitting
 trainColNum <- grep("train",names(trainset))
-#predicted variable is Class
-typeColNum <- grep("Class",names(Ionosphere))
 trainset <- trainset[,-trainColNum]
 testset <- testset[,-trainColNum]
+
+#predicted variable is Class -- same like train column, this is to grab the
+#column niumber for column called "CLASS"
+typeColNum <- grep("Class",names(Ionosphere))
+
+
+
+
+
+
 #build tree
+
 #default params. This is a classification problem so set method="class"
 rpart_model <- rpart(Class~.,data = trainset, method="class")
+
+
 #plot tree - SAVE PLOT for comparison later
 #plot(rpart_model);text(rpart_model)
+
+
 #prp from rpart.plot produces nicer plots
 prp(rpart_model)
 #summary
