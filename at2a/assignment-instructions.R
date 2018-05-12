@@ -112,6 +112,7 @@ df_agg <- df %>%
   summarise(monthly_mean = mean(monthly_amount)) %>% 
   ungroup()
 
+# two plots here not required by task 
 df_agg %>% plot_industry()
 df_agg %>% plot_location()
 
@@ -135,7 +136,10 @@ df_agg %>% plot_monthly(1,1,showlm = T)
 df_agg_ym <- df_agg %>% 
   mutate(m = month(date), y = year(date))
 
-df_agg_ym %>% plot_ym(1,1,T)
+df_agg_ym %>% plot_ym(1,1,F)
+
+
+
 #### Task 3 - lm #### 
 
 # For	industry =	1	and	location	=	1,	train a	linear	regression	model
@@ -146,14 +150,20 @@ df_agg_ym %>% plot_ym(1,1,T)
 
 # first will create a time variable for each month 
 
-df_agg_f <- df_agg %>% mutate(month = month(date), year = year(date))
+df_agg_f <- df_agg %>% mutate(month = as.integer(month(date)), year = as.integer(year(date)))
 
 # need to create lagged features before fitting, but will do later 
 
 # fitting an lm model 
 
-mod <-  lm(data = df_agg_f, formula = monthly_mean ~ year + month + industry + location)
+# mod <-  lm(data = df_agg_f, formula = monthly_mean ~ year + month + industry + location)
+# select  only industry 1 location 1 
+df_agg_f <- filter(df_agg_f, industry == 1, location == 1)
+mod <- lm(data= df_agg_f, formula = monthly_mean ~ month + year )
 plot(mod)
+
+# the above peice of code will need to repeated for each industry/location
+# combination, that is 100 times, beware of missling industry/locaiton combinations. 
 
 
 #### Notes ####
@@ -162,3 +172,52 @@ plot(mod)
 # Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
 # 0     95323    179399    395 397    375439 100000000 
 # the range (skewness is pretty high) 
+
+
+#### lagged mean example ####
+d <- data_frame(x=c(23,332,12,123,22,1231))
+d <- data_frame(x = d$x, x1 = roll_meanr(d$x, n=3))
+d %>% filter(is.na(x1)) %>% mutate(x1 = roll_meanr(x, n=2 )) -> d[is.na(d$x1),]
+d %>% filter(is.na(x1)) %>% mutate(x1 = roll_meanr(x, n=1 )) -> d[is.na(d$x1),]
+d
+
+#prepare a NA variable for lagging value 
+df_agg_f$mean3 <- NA 
+df_agg_f %>% select(date, monthly_mean, mean3)  %>% head()
+
+# calc lagging value for the first time using 3 points 
+df_agg_f %>% 
+  filter(is.na(mean3)) %>% 
+  mutate(mean3 = roll_meanr(monthly_mean, n=3 )) -> df_agg_f[is.na(df_agg_f$mean3),]
+
+# then 2 points to fill NAs
+df_agg_f %>% 
+  filter(is.na(mean3)) %>% 
+  mutate(mean3 = roll_meanr(monthly_mean, n=2 )) -> df_agg_f[is.na(df_agg_f$mean3),]
+
+# then 1 point for final one
+df_agg_f %>% 
+  filter(is.na(mean3)) %>% 
+  mutate(mean3 = roll_meanr(monthly_mean, n=1 )) -> df_agg_f[is.na(df_agg_f$mean3),]
+
+df_agg_f %>% ggplot(aes(x=mean3, y=monthly_mean)) + geom_point() + geom_smooth(method="lm")
+# lm with mean 3 
+mod2 <- lm(data= df_agg_f, formula = monthly_mean ~ month + year + mean3)
+
+df_agg_f$yf <- as.factor(df_agg_f$year)
+mod3 <- lm(data= df_agg_f, formula = monthly_mean ~ month + yf + mean3)
+
+
+# functionalise the process 
+df_agg_f$mean6 <- NA 
+for (i in 6:1) {
+  df_agg_f %>% 
+    filter(is.na(mean6)) %>% 
+    mutate(mean6 = roll_meanr(monthly_mean, n=i )) -> df_agg_f[is.na(df_agg_f$mean6),]
+}
+df_agg_f %>% select(date, monthly_mean, mean3, mean6)  %>% head(20)
+df_agg_f[1,] %>%  summarise(mean(monthly_mean))
+
+mod4 <- lm(data= df_agg_f, formula = monthly_mean ~  month + yf + mean3 + mean6)
+df_agg_f %>% ggplot(aes(x=mean6, y=monthly_mean)) + geom_point() + geom_smooth(method="lm")
+df_agg_f %>% ggplot(aes(x=mean3, y=monthly_mean)) + geom_point() + geom_smooth(method="lm")
