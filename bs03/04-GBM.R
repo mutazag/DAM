@@ -9,6 +9,9 @@
 # install.packages("gbm")
 # install.packages("caret")
 
+
+setwd("C:/mdsi/dam/bs03")
+
 library(gbm)
 library(caret)
 library(ISLR)
@@ -17,6 +20,8 @@ library(ISLR)
 # create data partition row list
 set.seed(42)
 train = createDataPartition(y = OJ$Purchase, p = 0.7, list = F)
+
+
 # partition default data - remove the variable Store7
 training = OJ[train, ]
 testing = OJ[-train, ]
@@ -36,7 +41,7 @@ testing[testing$Purchase == "MM", "Purchase_binary"] = 1
 gbm_depth = 5 #maximum nodes per tree
 gbm_n.min = 5 #minimum number of observations in the trees terminal, important effect on overfitting
 gbm_shrinkage=0.001 #learning rate
-cores_num = 4 #number of cores
+# cores_num = 4 #number of cores
 gbm_cv.folds=5 #number of cross-validation folds to perform
 num_trees = 5000
 
@@ -49,8 +54,8 @@ gbm_fit = gbm(Purchase_binary~.,
                   n.minobsinnode = gbm_n.min, 
                   shrinkage=gbm_shrinkage, 
                   cv.folds=gbm_cv.folds, 
-                  verbose = T, #print the preliminary output
-                  n.cores = cores_num
+                  verbose = T #print the preliminary output
+                  # n.cores = cores_num
 )
 
 summary(gbm_fit)
