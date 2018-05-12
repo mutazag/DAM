@@ -16,7 +16,7 @@ data("Ionosphere")
 #ncol(Ionosphere)
 #summary(Ionosphere)
 #create training and test sets
-set.seed(1)
+set.seed(15)
 Ionosphere[,"train"] <- ifelse(runif(nrow(Ionosphere))<0.8,1,0)
 #write dataframe to disk to check
 write.csv(Ionosphere,"Ionosphere.csv")
@@ -66,4 +66,8 @@ write.csv(test_predictions_dt2,file="test_predictions_dt2.csv")
 mean(rpart_pruned_predict==testset$Class)
 #confusion matrix (PRUNED model)
 table(pred=rpart_pruned_predict,true=testset$Class)
+
+
+
+#### new seeding ####
 
