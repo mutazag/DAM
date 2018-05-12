@@ -10,7 +10,7 @@
 
 library(ISLR)
 # we will use the pls package for Principal Components Regression
-install.packages("pls")
+# install.packages("pls")
 library(pls)
 
 ###########################################
@@ -61,9 +61,30 @@ validationplot(pcr_fit, val.type = "MSEP")
 # To choose the number of components, we analyse the validation plot, 
 # as well as the % variance explained in summary(pcr.fit)
 
-# choose a number for the number of components
-ncomp = 7
 
+## scree plot and cumulative variace on this data set 
+# first calc the principle components for the set 
+#### convert factors to numirics 
+factor_cols <- Hitters[,sapply(Hitters, is.factor)]
+sapply(Hitters, is.factor)
+Hitters$League <- as.numeric(Hitters$League)
+Hitters$Division <- as.numeric(Hitters$League)
+Hitters$NewLeague <- as.numeric(Hitters$League)
+
+hitters_prout <- prcomp(~. , data=Hitters, scale = T, na.action = na.omit)
+pr_var = hitters_prout$sdev ^ 2
+pve = pr_var / sum(pr_var)
+# Scree plot
+plot(pve, type = "b", main = "Scree Plot", 
+     ylab = "Proportion of Variance Explained",
+     xlab = "Principal Component")
+# Plot of cumulative variance explained
+plot(cumsum(pve), type = 'b', main = "Cumulative Variance Explained",
+     xlab = "Cumulative Proportion of Variance Explained",
+     ylab = "Number of Components")
+# cumsum plot shows that 10 PCAs will explain around 95% of the variablity, more than enough 
+# choose a number for the number of components
+ncomp =  7
 # output predictions
 pcr_pred = predict(pcr_fit, Hitters, ncomp = ncomp)
 
