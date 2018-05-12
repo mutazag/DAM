@@ -6,7 +6,7 @@ library(mlbench)
 
 
 #setwd("C:/Users/Kailash/Documents/dam_lecture_3")
-
+setwd("c:/mdsi/dam/bs03")
 
 #Load Ionosphere  dataset (classification problem)
 data("Ionosphere")
@@ -28,6 +28,8 @@ trainColNum <- grep("train",names(trainset))
 typeColNum <- grep("Class",names(Ionosphere))
 trainset <- trainset[,-trainColNum]
 testset <- testset[,-trainColNum]
+
+
 #build tree
 #default params. This is a classification problem so set method="class"
 rpart_model <- rpart(Class~.,data = trainset, method="class")
@@ -42,9 +44,14 @@ table(pred=rpart_predict,true=testset$Class)
 #cost complexity pruning
 #cost-complexity plot - can you see the minimum in the plot?
 plotcp(rpart_model)
+
+
+
 #find minimum
 opt <- which.min(rpart_model$cptable[,"xerror"])
 cp <- rpart_model$cptable[opt, "CP"]
+
+#### the pruning method
 pruned_model <- prune(rpart_model,cp)
 #plot tree (PRUNED)
 prp(pruned_model)
@@ -59,3 +66,4 @@ write.csv(test_predictions_dt2,file="test_predictions_dt2.csv")
 mean(rpart_pruned_predict==testset$Class)
 #confusion matrix (PRUNED model)
 table(pred=rpart_pruned_predict,true=testset$Class)
+
