@@ -350,7 +350,7 @@ coef(cv.fit_lasso, s = cv.fit_lasso$lambda.min)
 xtest <- model.matrix(~ ., testing %>% select(-monthly_mean))
 ytest <- testing$monthly_mean
 ypred <- predict(cv.fit_lasso$glmnet.fit, newx = xtest, s = cv.fit_lasso$lambda.min)
-ypred <- predict(cv.fit_lasso$glmnet.fit, newx = xtest, s = 7.389056)
+# ypred <- predict(cv.fit_lasso$glmnet.fit, newx = xtest, s = 7.389056)
 # predect based on test 
 lasso_MSE = mean ( (ypred - ytest)^2)
 lasso_MSE
@@ -360,4 +360,23 @@ mod4_pred %>% summarise( mean( (ypred-ytest)^2)) -> mod4_MSE
 mod4_MSE
 lasso_MSE < mod4_MSE
 # 115263837 <66247298
-#### Task 4 - repeat lm process for all industry/month combinations and predict decemebt 2016 for all of them ####
+
+# calc R2 for lasso -
+# https://stats.stackexchange.com/questions/142248/difference-between-r-square-and-rmse-in-linear-regression
+# TSS - totalsum of  squares = sum ( (y - mean(y))^2)
+lasso_TSS = sum((y - mean(y))^2)
+mod4_TSS = sum( (mod4_pred$ytest - mean(mod4_pred$ytest))^2)
+
+# SSE = sum of sqaured errors == sum( (yi - ypred)^2 )
+lasso_SSE = sum( (ytest - ypred)^2)
+mod4_SSE = sum ( (mod4_pred$ytest - mod4_pred$ypred)^2)
+
+# R2 = 1 - TSS/RSS
+lass_R2 <- 1 - (lasso_SSE / lasso_TSS) # 0.8654213
+mod4_R2 <- 1 - (mod4_SSE / mod4_TSS) # 0.6955373
+summary(mod4) # multiple R-squared:  0.6955,	Adjusted R-squared:  0.6499 
+
+#conclusion, lasso has a much higer R2, caveat, mod4 was not based on a splot
+#data set for trainng and testing,  next i should use the same training/testing
+#data set to co,pare lasso and lm() ### Task 4 - repeat lm process for all
+#industry/month combinations and predict decemebt 2016 for all of them ####
