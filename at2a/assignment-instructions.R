@@ -233,7 +233,10 @@ d %>% filter(is.na(x1)) %>% mutate(x1 = roll_meanr(x, n=2 )) -> d[is.na(d$x1),]
 d %>% filter(is.na(x1)) %>% mutate(x1 = roll_meanr(x, n=1 )) -> d[is.na(d$x1),]
 d
 
-#prepare a NA variable for lagging value 
+#need to consider a different method as roll_meanr takes the target value in
+#calc alternate is to sort desc by date, pick the recod for the date to predict
+#and go back by 3 or 6 months using row numbers prepare a NA variable for
+#lagging value
 df_agg_f$mean3 <- NA 
 df_agg_f %>% select(date, monthly_mean, mean3)  %>% head()
 
