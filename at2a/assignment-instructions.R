@@ -9,6 +9,7 @@ library(readr)
 library(tidyr)
 library(lubridate)
 library(scales)
+library(RcppRoll) # used to calculate rolling mean
 
 
 
@@ -79,7 +80,7 @@ plot_monthly <- function(df_agg, i=1, l=1, showlm = FALSE)
 
 plot_ym <- function(df_agg_ym, i=1, l=1, showlm = FALSE)
 {
-  print("monthly on year by year")
+  print("month by month for each year ")
   df_filter <- df_agg_ym %>% filter(industry %in% i, location %in% l)
   
   p <- df_filter %>% 
@@ -92,6 +93,31 @@ plot_ym <- function(df_agg_ym, i=1, l=1, showlm = FALSE)
          subtitle = "Month View by Year", 
          caption = paste0("Industry: ", i, ". Location: ", l), 
          x = "Date", 
+         y = "Mean Monthly Sales ($)", 
+         colour = "Year")
+  
+  if (showlm == TRUE) {
+    p <- p + geom_smooth(method = "lm", se = FALSE)
+  }
+  
+  p
+}
+
+plot_my <- function(df_agg_ym, i=1, l=1, showlm = FALSE)
+{
+  print("monthly on year by year")
+  df_filter <- df_agg_ym %>% filter(industry %in% i, location %in% l, m==12)
+  
+  p <- df_filter %>% 
+    ggplot(aes(x=y, y=monthly_mean, color=factor(m))) + 
+    geom_line() +
+    scale_x_continuous(breaks = 1:12, minor_breaks = NULL) +
+    scale_y_continuous(labels = scales::comma) +
+    theme(axis.text.x = element_text(angle=90)) + 
+    labs(title = "Mean Monthly Sales over Date", 
+         subtitle = "Month YoY", 
+         caption = paste0("Industry: ", i, ". Location: ", l), 
+         x = "Year", 
          y = "Mean Monthly Sales ($)", 
          colour = "Year")
   
@@ -137,6 +163,7 @@ df_agg_ym <- df_agg %>%
   mutate(m = month(date), y = year(date))
 
 df_agg_ym %>% plot_ym(1,1,F)
+df_agg_ym %>% plot_my(1,1,F)
 
 
 
@@ -161,6 +188,16 @@ df_agg_f <- df_agg %>% mutate(month = as.integer(month(date)), year = as.integer
 df_agg_f <- filter(df_agg_f, industry == 1, location == 1)
 mod <- lm(data= df_agg_f, formula = monthly_mean ~ month + year )
 plot(mod)
+
+#### todo on lm model ####
+# split to train and test data 
+
+# compare prediction find error 
+
+# quantiative assessment of error 
+
+# predict december 2016 for this industry/location 
+
 
 # the above peice of code will need to repeated for each industry/location
 # combination, that is 100 times, beware of missling industry/locaiton combinations. 
@@ -201,14 +238,18 @@ df_agg_f %>%
   mutate(mean3 = roll_meanr(monthly_mean, n=1 )) -> df_agg_f[is.na(df_agg_f$mean3),]
 
 df_agg_f %>% ggplot(aes(x=mean3, y=monthly_mean)) + geom_point() + geom_smooth(method="lm")
-# lm with mean 3 
-mod2 <- lm(data= df_agg_f, formula = monthly_mean ~ month + year + mean3)
+df_agg_f %>% ggplot(aes(x=date, y=mean3)) + geom_line()  + geom_smooth(method="lm")
+df_agg_f %>% ggplot(aes(x=date, y=monthly_mean)) + geom_line()  + geom_smooth(method="lm")
 
+
+# lm with mean 3 (with year as numerical and then as factor)
+mod2 <- lm(data= df_agg_f, formula = monthly_mean ~ month + year + mean3)
 df_agg_f$yf <- as.factor(df_agg_f$year)
 mod3 <- lm(data= df_agg_f, formula = monthly_mean ~ month + yf + mean3)
 
 
-# functionalise the process 
+# functionalise the process of creating lagged features
+# this will create a feature for mean over 6 previous months
 df_agg_f$mean6 <- NA 
 for (i in 6:1) {
   df_agg_f %>% 
@@ -219,5 +260,17 @@ df_agg_f %>% select(date, monthly_mean, mean3, mean6)  %>% head(20)
 df_agg_f[1,] %>%  summarise(mean(monthly_mean))
 
 mod4 <- lm(data= df_agg_f, formula = monthly_mean ~  month + yf + mean3 + mean6)
+
+# the following two lines are not very useful
 df_agg_f %>% ggplot(aes(x=mean6, y=monthly_mean)) + geom_point() + geom_smooth(method="lm")
 df_agg_f %>% ggplot(aes(x=mean3, y=monthly_mean)) + geom_point() + geom_smooth(method="lm")
+
+# the follwing two lines show less variablity arond the mean for mean6 over
+# monthly mean, but using mean6 as an outome means that we will need to umean
+# the result to get the monthly value
+df_agg_f %>% ggplot(aes(x=date, y=mean6)) + geom_line()  + geom_smooth(method="lm")
+df_agg_f %>% ggplot(aes(x=date, y=monthly_mean)) + geom_line()  + geom_smooth(method="lm")
+
+
+
+#### Task 4 - repeat lm process for all industry/month combinations and predict decemebt 2016 for all of them ####
