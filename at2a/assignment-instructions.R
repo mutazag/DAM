@@ -309,6 +309,15 @@ cor(df_agg_f%>% select(mean3, mean6), method="spearman")
 # mean3 1.0000000 0.9118871
 # mean6 0.9118871 1.0000000
 
-# high colinearity between mean3 and mean6 -> regulisation is required 
+# high colinearity between mean3 and mean6 -> regulisation is required , or try lasso regression 
+#
+
+#### lasso #### lasso (least absolute shrinkage and selection operator) (also
+#Lasso or LASSO) is a regression analysis method that performs both variable
+#selection and regularization in order to enhance the prediction accuracy and
+#interpretability of the statistical model it produces.
+# https://en.wikipedia.org/wiki/Lasso_(statistics)
+
+
 
 #### Task 4 - repeat lm process for all industry/month combinations and predict decemebt 2016 for all of them ####
