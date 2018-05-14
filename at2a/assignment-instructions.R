@@ -317,7 +317,47 @@ cor(df_agg_f%>% select(mean3, mean6), method="spearman")
 #selection and regularization in order to enhance the prediction accuracy and
 #interpretability of the statistical model it produces.
 # https://en.wikipedia.org/wiki/Lasso_(statistics)
+# https://www.r-bloggers.com/ridge-regression-and-the-lasso/
 
+library(glmnet)
+library(caret)
 
+# create training sub set -- other method is k-folds
+set.seed(42)
+train <- createDataPartition(y = df_agg_f$monthly_mean, p = 0.7, list = F)
+training <- df_agg_f[train, ] %>% select(-date, -industry, -location, -year)
+testing = df_agg_f[-train, ] %>% select(-date, -industry, -location, -year)
+# prepare x and y for glment 
+x = model.matrix(~ ., training %>% select(-monthly_mean))
+y = training$monthly_mean
 
+# set alpha to 1 for lasso
+# cv.glmnet will fit based on best lambda by cross validation (as opposed to just glmnet)
+cv.fit_lasso = cv.glmnet(x, y,  alpha = 1) # alpha 1 == lasso 
+# glmnet(x, y,  alpha = 1) -> gg
+# predict(gg, xtest, s = min(gg$lambda))
+
+#look at results of lasso
+plot(cv.fit_lasso)
+cv.fit_lasso$lambda.min # best lambda
+cv.fit_lasso$lambda.1se
+
+coef(cv.fit_lasso, s = cv.fit_lasso$lambda.min) 
+
+# it shows that it reduces mean6 coeff when compare with mod4
+
+# no predict on testing data and calculate MSE = mean( (ypred - ytest)^2 )
+xtest <- model.matrix(~ ., testing %>% select(-monthly_mean))
+ytest <- testing$monthly_mean
+ypred <- predict(cv.fit_lasso$glmnet.fit, newx = xtest, s = cv.fit_lasso$lambda.min)
+ypred <- predict(cv.fit_lasso$glmnet.fit, newx = xtest, s = 7.389056)
+# predect based on test 
+lasso_MSE = mean ( (ypred - ytest)^2)
+lasso_MSE
+#compare withmod 4
+mod4 %>% augment() %>% select(ytest = monthly_mean, ypred = .fitted) -> mod4_pred
+mod4_pred %>% summarise( mean( (ypred-ytest)^2)) -> mod4_MSE
+mod4_MSE
+lasso_MSE < mod4_MSE
+# 115263837 <66247298
 #### Task 4 - repeat lm process for all industry/month combinations and predict decemebt 2016 for all of them ####
