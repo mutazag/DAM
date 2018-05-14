@@ -189,6 +189,21 @@ df_agg_f <- filter(df_agg_f, industry == 1, location == 1)
 mod <- lm(data= df_agg_f, formula = monthly_mean ~ month + year )
 plot(mod)
 
+# using broom::augment()
+mod %>% augment() %>% filter(row_number()==1)
+# this will show the outcome and fitted vaule, all features, and error measures 
+
+# values with high cooksd have high influence! is this useful in the context
+# given the the value is not an outlier!
+mod %>% augment() %>% ggplot(aes(x=monthly_mean, y=.cooksd)) + geom_point()
+# fitte coeefcients 
+coef(mod)
+
+# two ways to look at fitted values 
+data.frame(f1=fitted.values(mod)) -> fitted1
+mod %>% augment() %>% select(f2 = .fitted, .resid) -> fitted2
+data.frame(fitted1, fitted2) %>% mutate(r = f2 - f1)
+fitted1[1,] - fitted2[1,]
 #### todo on lm model ####
 # split to train and test data 
 
@@ -260,10 +275,12 @@ df_agg_f %>% select(date, monthly_mean, mean3, mean6)  %>% head(20)
 df_agg_f[1,] %>%  summarise(mean(monthly_mean))
 
 mod4 <- lm(data= df_agg_f, formula = monthly_mean ~  month + yf + mean3 + mean6)
+mod5 <- lm(data= df_agg_f, formula = monthly_mean ~  month + year + mean3 + mean6)
 
-# the following two lines are not very useful
+# the following lines show if there is a linear relation between predictor and targets 
 df_agg_f %>% ggplot(aes(x=mean6, y=monthly_mean)) + geom_point() + geom_smooth(method="lm")
 df_agg_f %>% ggplot(aes(x=mean3, y=monthly_mean)) + geom_point() + geom_smooth(method="lm")
+df_agg_f %>% ggplot(aes(x=month, y=monthly_mean)) + geom_point() + geom_smooth(method="lm")
 
 # the follwing two lines show less variablity arond the mean for mean6 over
 # monthly mean, but using mean6 as an outome means that we will need to umean
@@ -271,6 +288,27 @@ df_agg_f %>% ggplot(aes(x=mean3, y=monthly_mean)) + geom_point() + geom_smooth(m
 df_agg_f %>% ggplot(aes(x=date, y=mean6)) + geom_line()  + geom_smooth(method="lm")
 df_agg_f %>% ggplot(aes(x=date, y=monthly_mean)) + geom_line()  + geom_smooth(method="lm")
 
+# shall we use dummies for categorical variables like year 
+library(dummies)
+cbind(df_agg_f, dummy(df_agg_f$yf)) -> df_dummies
+df_dummies %>% select( -date, -industry, -location, -yf, -year) %>%  
+  lm(formula = monthly_mean ~ .)  -> mod4_dummies 
+# mod4 dummies R2adj -> 0.6499
+# mod4 R2adj -> 0.6499
+# no difference as lm takes care of factor predictors 
 
+## test for coliearity 
+pairs(df_agg_f) # we see colinearity between mean3 and mean5, and 
+cor(df_agg_f%>% select(mean3, mean6), method="pearson")
+
+#           mean3     mean6
+# mean3 1.0000000 0.9392523
+# mean6 0.9392523 1.0000000
+cor(df_agg_f%>% select(mean3, mean6), method="spearman")
+#           mean3     mean6
+# mean3 1.0000000 0.9118871
+# mean6 0.9118871 1.0000000
+
+# high colinearity between mean3 and mean6 -> regulisation is required 
 
 #### Task 4 - repeat lm process for all industry/month combinations and predict decemebt 2016 for all of them ####
