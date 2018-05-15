@@ -25,13 +25,15 @@ library(broom)
 
 df <- read_csv("transactions.csv")
 
+
+# industry and location are categorical variables
 df$industry <- as.factor(df$industry)
 df$location <- as.factor(df$location)
 df$date <- dmy(df$date)
 glimpse(df)
 
 
-#### plotting function ####
+#### plotting functions ####
 ## the following plotting functions are used to inspect the data set
 
 plot_location <- function (df)
@@ -91,3 +93,4 @@ df_agg %>% plot_location()
 
 # save the aggregates data set to file to use in later tasks
 write_csv(df_agg, "./transactions_agg.csv")
+

@@ -81,14 +81,16 @@ plot_monthly <- function(df_agg, i=1, l=1, showlm = FALSE)
   p
 }
 
-plot_ym <- function(df_agg_ym, i=1, l=1, showlm = FALSE)
+plot_ym <- function(df_agg, i=1, l=1, yparam=2013:2016)
 {
   print("month by month for each year ")
-  df_filter <- df_agg_ym %>% filter(industry %in% i, location %in% l)
+  df_filter <- df_agg %>% 
+    mutate(m = month(date), y = year(date)) %>%
+    filter(industry %in% i, location %in% l, y %in% yparam)
   
   p <- df_filter %>% 
     ggplot(aes(x=m, y=monthly_mean, color=factor(y))) + 
-    geom_line()  +
+    geom_line()  + facet_wrap(~factor(y)) +
     scale_x_continuous(breaks = 1:12, labels = month.name, minor_breaks = NULL) +
     scale_y_continuous(labels = scales::comma) +
     theme(axis.text.x = element_text(angle=90)) + 
@@ -99,22 +101,20 @@ plot_ym <- function(df_agg_ym, i=1, l=1, showlm = FALSE)
          y = "Mean Monthly Sales ($)", 
          colour = "Year")
   
-  if (showlm == TRUE) {
-    p <- p + geom_smooth(method = "lm", se = FALSE)
-  }
-  
   p
 }
 
-plot_my <- function(df_agg_ym, i=1, l=1, showlm = FALSE)
+plot_my <- function(df_agg_ym, i=1, l=1, mparam = 1, showlm = FALSE)
 {
   print("monthly on year by year")
-  df_filter <- df_agg_ym %>% filter(industry %in% i, location %in% l, m==12)
+  df_filter <- df_agg_ym %>% 
+    mutate(m = month(date), y = year(date)) %>%
+    filter(industry %in% i, location %in% l, m %in% mparam)
   
   p <- df_filter %>% 
     ggplot(aes(x=y, y=monthly_mean, color=factor(m))) + 
-    geom_line() +
-    scale_x_continuous(breaks = 1:12, minor_breaks = NULL) +
+    geom_point() + facet_wrap(~factor(m)) +
+    scale_x_continuous(minor_breaks = NULL) +
     scale_y_continuous(labels = scales::comma) +
     theme(axis.text.x = element_text(angle=90)) + 
     labs(title = "Mean Monthly Sales over Date", 
@@ -122,7 +122,7 @@ plot_my <- function(df_agg_ym, i=1, l=1, showlm = FALSE)
          caption = paste0("Industry: ", i, ". Location: ", l), 
          x = "Year", 
          y = "Mean Monthly Sales ($)", 
-         colour = "Year")
+         colour = "Month")
   
   if (showlm == TRUE) {
     p <- p + geom_smooth(method = "lm", se = FALSE)
@@ -165,7 +165,7 @@ df_agg %>% plot_monthly(1,1,showlm = T)
 df_agg_ym <- df_agg %>% 
   mutate(m = month(date), y = year(date))
 
-df_agg_ym %>% plot_ym(1,1,F)
+df_agg %>% plot_ym(1,1,F)
 df_agg_ym %>% plot_my(1,1,F)
 
 
