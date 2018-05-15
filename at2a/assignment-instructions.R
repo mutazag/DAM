@@ -10,6 +10,7 @@ library(tidyr)
 library(lubridate)
 library(scales)
 library(RcppRoll) # used to calculate rolling mean
+library(broom)
 
 
 
