@@ -10,6 +10,7 @@ library(tidyr)
 library(lubridate)
 library(scales)
 library(RcppRoll) # used to calculate rolling mean
+library(broom)
 
 
 
@@ -66,8 +67,10 @@ plot_monthly <- function(df_agg, i=1, l=1, showlm = FALSE)
     geom_line() + 
     facet_grid(industry ~ location,  labeller = label_both ) +
     scale_y_continuous(labels = scales::comma) +
+    theme(axis.text.x = element_text(angle=90)) + 
     labs(title = "Mean Monthly Sales over Date", 
-         caption = paste0("Industry: ", i, ". Location: ", l),
+         caption = paste0("Industry: ", paste(i, collapse = ","),
+                          "\n. Location: ", paste(l, collapse = ",")),
          x = "Date", 
          y = "Mean Monthly Sales ($)")
   
