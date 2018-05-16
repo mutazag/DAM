@@ -36,12 +36,15 @@ df_agg <- read_csv("./transactions_agg.csv",
 # first	month,	2	for	the	second	month,	etc.)
 
 
-# process to following
+# Process:
 # 1. select features and feature engineer
 # 2. split the data into training and tesing data 
 # 3. create the model using lm() (evaluate different features)
 # 4. predict out of sample outcome 
 
+# Note: this code file represents the final outcome after experminting with
+# different options for feature engineering, fit forumla, modeling functoins (lm
+# and glment).
 
 #### 1. feature engineering ####
 
