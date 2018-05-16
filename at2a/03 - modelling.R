@@ -16,15 +16,7 @@ library(scales)
 library(RcppRoll) # used to calculate rolling mean
 library(broom)
 
-
-## load the summarised transactions file 
-df_agg <- read_csv("./transactions_agg.csv", 
-                   col_types = list(
-                     readr::col_date(format=""), 
-                     readr::col_factor(levels = NULL),
-                     readr::col_factor(levels = NULL), 
-                     readr::col_double()))
-
+setwd("c:/mdsi/dam/at2a")
 
 
 #### Task 3 - lm #### 
@@ -48,32 +40,38 @@ df_agg <- read_csv("./transactions_agg.csv",
 
 #### 1. feature engineering ####
 
-# features: 
-# month(categorical and categorical), 
-# year(numerical) 
-# lagged features for mean of past 3 and 6 months
+# load the prepared  feature engineered transaction file 
+df_features <- read_csv("./transactions_features.csv", 
+                        col_types = list(
+                          readr::col_date(format=""), 
+                          readr::col_factor(levels = NULL),
+                          readr::col_factor(levels = NULL), 
+                          readr::col_double(), 
+                          readr::col_integer(), 
+                          readr::col_factor(levels=NULL), 
+                          readr::col_integer(), 
+                          readr::col_double(), 
+                          readr::col_double()
+                        ))
 
 
-df_features <- df_agg %>% 
-  mutate( year = year(date), 
-          month = factor(month(date)),
-          monthn = month(date)
-          )
+#### 2. data split for training and testing ####
 
 
-
-#### model testing with different features ####
+#### 3. create the model using lm() (evaluate different features) ####
 
 fit_model <- function (df, formula, ind=1, loc=1){
-  df_subset <- df %>% filter(industry==1, location==1)
+  df_subset <- df %>% filter(industry==ind, location==loc)
   
   mod <- lm (data = df_subset, formula = formula)
-  mod.r2 <- summary(mod)$r.sq
+  mod.r2 <- summary(mod)$adj.r.squared
   mod.rse <- summary(mod)$sigma
   mod.Ymean <- mod %>% augment()
   #inspect RSE, Adj R-squared
+  print(formula)
   print(paste("RSE:", mod.rse))
   print(paste("Adj R-sqr:", mod.r2)) 
+  return(mod)
 }
 
 #### mod1: year + month ####
@@ -82,7 +80,10 @@ fit_model(df_features, ind=1,loc=1, formula = monthly_mean ~ year + month)
 
 fit_model(df_features, ind=1,loc=1, formula = monthly_mean ~ year + monthn)
 
-
+fit_model(df_features, ind=1,loc=1, formula = monthly_mean ~ year + month + m3+m6) -> mod
+fit_model(df_features, ind=1,loc=1, formula = monthly_mean ~ year + monthn + m3+m6) -> mod
+summary(mod)$coefficients
+summary(mod)
 # Residual standard error: 6844 on 34 degrees of freedom
 # Multiple R-squared:  0.8443,	Adjusted R-squared:  0.7893 
 
@@ -98,6 +99,8 @@ mod1.rse <- summary(mod1)$sigma
 
 # names(mod1)
 
+
+#### 4. predict out of sample outcome ####
 # create a prediciton out of sample
 predict(mod1, 
         data.frame(year=2016, month=factor(12)), 

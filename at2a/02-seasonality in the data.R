@@ -16,7 +16,7 @@ library(scales)
 library(RcppRoll) # used to calculate rolling mean
 library(broom)
 
-
+setwd("c:/mdsi/dam/at2a")
 ## load the summarised transactions file 
 df_agg <- read_csv("./transactions_agg.csv", 
                    col_types = list(
