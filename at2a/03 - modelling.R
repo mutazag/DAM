@@ -75,10 +75,10 @@ fit_model <- function (df, formula, ind=1, loc=1){
 }
 
 #### mod1: year + month ####
-fit_model(df_features, ind=1,loc=1, formula = monthly_mean ~ year + month)
+fit_model(df_features, ind=1,loc=1, formula = monthly_mean ~ year + month) -> mod
 
 
-fit_model(df_features, ind=1,loc=1, formula = monthly_mean ~ year + monthn)
+fit_model(df_features, ind=1,loc=1, formula = monthly_mean ~ year + monthn) -> mod
 
 fit_model(df_features, ind=1,loc=1, formula = monthly_mean ~ year + month + m3+m6) -> mod
 fit_model(df_features, ind=1,loc=1, formula = monthly_mean ~ year + monthn + m3+m6) -> mod
@@ -99,9 +99,53 @@ mod1.rse <- summary(mod1)$sigma
 
 # names(mod1)
 
+#### fitting all industry and locations ####
 
-#### 4. predict out of sample outcome ####
-# create a prediciton out of sample
+# model per combo
+combos <- df_features %>% select(industry,location) %>% distinct()
+combos <- combos  %>%filter(industry==10)
+for (i in 1:nrow(combos)) {
+  c <- combos[i,]
+  print(c)
+  mod <- fit_model(df_features, ind = c$industry, loc=c$location, 
+            formula = monthly_mean ~ year + month)
+  mod
+}
+
+#this has produced models where R2 is nan industry 10,locaiton 3 since there is
+#no year data, this specific example is not a linear model since there is
+#exactly 12 outcomes one for each month in the data set 
+
+# other proeuced negative R2, R2 is negative only when the chosen model does not
+# follow the trend of the data, so fits worse than a horizontal line. this
+# indicates a poorly chosen model a sign of using wrong formula
+# example is industry 10, locaiton 9 with formula monthly_mean ~ year + month
+fit_model(df_features, ind = 10, loc =9, formula = monthly_mean ~ year + month)
+df_features %>% filter(industry==10,location==9) %>% ggplot(aes(x=date, y=monthly_mean)) + 
+  geom_line() + geom_smooth(method="lm")
+#fitting the same with different formula
+fit_model(df_features, ind = 10, loc =9, formula = monthly_mean ~ year )
+fit_model(df_features, ind = 10, loc =9, formula = monthly_mean ~ month)
+fit_model(df_features, ind = 10, loc =9, formula = monthly_mean ~ m6)
+
+
+
+
+
+
+## fitting a model with i and l as predictors
+
+lm(df_features, formula = monthly_mean ~ industry + location + monthn + year) %>% summary()
+mean(df_features$monthly_mean)
+# produced an acceptable R 2 of 0.68 but the RSE is 2.261 mil which is pretty
+# high considering that the mean of y is 1.014 mil
+
+
+
+#### 4. predict out of sample outcome #### 
+
+
+#create a prediciton out of sample
 predict(mod1, 
         data.frame(year=2016, month=factor(12)), 
         interval = "confidence")
