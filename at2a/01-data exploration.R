@@ -82,6 +82,9 @@ df_agg <- df %>%
   summarise(monthly_mean = mean(monthly_amount)) %>% 
   ungroup()
 
+# variabels in the aggregate
+colnames(df_agg)
+
 # The following plots show the distribution of monthly_mean for industry and
 # location. The plots highlight that there are differences in industries 6,10
 # and locations 1,8 where mean monthly sales observations for the combinations
@@ -93,4 +96,10 @@ df_agg %>% plot_location()
 
 # save the aggregates data set to file to use in later tasks
 write_csv(df_agg, "./transactions_agg.csv")
+
+# save summary data for industry 1 location 1
+df_agg_11 <-  df_agg %>% filter(industry==1, location==1)
+summary(df_agg_11)
+write_csv(df_agg_11, "./transactions_agg_11.csv")
+
 

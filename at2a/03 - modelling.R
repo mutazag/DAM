@@ -15,6 +15,7 @@ library(lubridate)
 library(scales)
 library(RcppRoll) # used to calculate rolling mean
 library(broom)
+library(caret)
 
 setwd("c:/mdsi/dam/at2a")
 
@@ -28,17 +29,11 @@ setwd("c:/mdsi/dam/at2a")
 # first	month,	2	for	the	second	month,	etc.)
 
 
-# Process:
-# 1. select features and feature engineer
-# 2. split the data into training and tesing data 
-# 3. create the model using lm() (evaluate different features)
-# 4. predict out of sample outcome 
 
-# Note: this code file represents the final outcome after experminting with
-# different options for feature engineering, fit forumla, modeling functoins (lm
-# and glment).
+# Note: this code file represents trials and final outcome after experminting with
+# different options for feature engineering, fit forumla
 
-#### 1. feature engineering ####
+#### 1. feature engineering: load featurised data set ####
 
 # load the prepared  feature engineered transaction file 
 df_features <- read_csv("./transactions_features.csv", 
@@ -55,101 +50,84 @@ df_features <- read_csv("./transactions_features.csv",
                         ))
 
 
-#### 2. data split for training and testing ####
+
+#### functions ####
+
+
+# print RMSE, RSE and AdjR2 for model
+model_summary <- function(mod){
+  mod_summary <- list()
+  
+  mod_summary$r2 <- summary(mod)$adj.r.squared
+  mod_summary$rse <- summary(mod)$sigma
+  mod_summary$aug <- mod %>% augment()
+  # calculate RMSE
+  mod_summary$RMSE <- sqrt(mean(mod_summary$aug$.resid ^ 2))
+  
+  #inspect RSE, Adj R-squared
+  # 
+  # sprintf("RMSE: %0.3f", mod_summary$RMSE)
+  # sprintf("RSE: %0.4f", mod_summary$rse)
+  # sprintf("Adj R-sqr: %0.4f", mod_summary$r2) 
+  print(paste0("Adj R-sqr: ", mod_summary$r2))
+  print(paste0("RMSE: ", mod_summary$RMSE)) # or RMSE(pred = mod1$fitted.values, obs = mod1$model$monthly_mean)
+  print(paste0("RSE: ", mod_summary$rse))
+  
+  
+}
+
+
+# fit model for based on formula for a given industry amd location 
+fit_model <- function (df, formula, ind=1, loc=1){
+  df_subset <- df %>% filter(industry==ind, location==loc)
+  mod <- lm (data = df_subset, formula = formula)
+  
+  
+  print(formula)
+  model_summary(mod)
+  return(mod)
+}
+
+
+# cross validate model with out-ofsample and print average out-of-sample RMSE 
+fit_model_cv <- function (df, formula, ind=1, loc=1){
+  df_subset <- df %>% filter(industry==ind, location==loc)
+  trControl <- trainControl(method = "cv",number = 15, verboseIter = FALSE)
+  mod <- train(formula, df_subset, method = "lm", trControl = trControl)
+  
+  print(formula)
+  print("cross validation")
+  print(mod$results)
+  print("final model")
+  model_summary(mod$finalModel)
+  return(mod)
+}
 
 
 #### 3. create the model using lm() (evaluate different features) ####
 
-fit_model <- function (df, formula, ind=1, loc=1){
-  df_subset <- df %>% filter(industry==ind, location==loc)
-  
-  mod <- lm (data = df_subset, formula = formula)
-  mod.r2 <- summary(mod)$adj.r.squared
-  mod.rse <- summary(mod)$sigma
-  mod.Ymean <- mod %>% augment()
-  #inspect RSE, Adj R-squared
-  print(formula)
-  print(paste("RSE:", mod.rse))
-  print(paste("Adj R-sqr:", mod.r2)) 
-  return(mod)
-}
+# model and compare with different features/formulas ####
 
-#### mod1: year + month ####
-fit_model(df_features, ind=1,loc=1, formula = monthly_mean ~ year + month) -> mod
+df_features %>% filter(industry==1, location==1) %>% summarise(mean = mean(monthly_mean))
+# mod1: year and month (categorical)
+fit_model(df_features, ind=1,loc=1, formula = monthly_mean ~ year + month) -> mod1
+
+#mod2: year and monthn (numerical)
+fit_model(df_features, ind=1,loc=1, formula = monthly_mean ~ year + monthn) -> mod2
+
+#mod3: year, month and lagged fetures (m3 and m6)
+fit_model(df_features, ind=1,loc=1, formula = monthly_mean ~ year + month + m3+m6) -> mod3
 
 
-fit_model(df_features, ind=1,loc=1, formula = monthly_mean ~ year + monthn) -> mod
-
-fit_model(df_features, ind=1,loc=1, formula = monthly_mean ~ year + month + m3+m6) -> mod
-fit_model(df_features, ind=1,loc=1, formula = monthly_mean ~ year + monthn + m3+m6) -> mod
-summary(mod)$coefficients
-summary(mod)
-# Residual standard error: 6844 on 34 degrees of freedom
-# Multiple R-squared:  0.8443,	Adjusted R-squared:  0.7893 
-
-# mean of Y = 166867
-df_features %>% filter(location==1, industry==1) %>% summarise(ymean = mean(monthly_mean))
-
-#RSE meadured in units Y indicates that prediction is likely to be off by about
-#$6844, this is ~ 4% of mean of Y ($166,867)
-#Risduals vs fitted plot shows a curve of the error in fitted values
-
-mod1.r2 <- summary(mod1)$r.sq
-mod1.rse <- summary(mod1)$sigma
-
-# names(mod1)
-
-#### fitting all industry and locations ####
-
-# model per combo
-combos <- df_features %>% select(industry,location) %>% distinct()
-combos <- combos  %>%filter(industry==10)
-for (i in 1:nrow(combos)) {
-  c <- combos[i,]
-  print(c)
-  mod <- fit_model(df_features, ind = c$industry, loc=c$location, 
-            formula = monthly_mean ~ year + month)
-  mod
-}
-
-#this has produced models where R2 is nan industry 10,locaiton 3 since there is
-#no year data, this specific example is not a linear model since there is
-#exactly 12 outcomes one for each month in the data set 
-
-# other proeuced negative R2, R2 is negative only when the chosen model does not
-# follow the trend of the data, so fits worse than a horizontal line. this
-# indicates a poorly chosen model a sign of using wrong formula
-# example is industry 10, locaiton 9 with formula monthly_mean ~ year + month
-fit_model(df_features, ind = 10, loc =9, formula = monthly_mean ~ year + month)
-df_features %>% filter(industry==10,location==9) %>% ggplot(aes(x=date, y=monthly_mean)) + 
-  geom_line() + geom_smooth(method="lm")
-#fitting the same with different formula
-fit_model(df_features, ind = 10, loc =9, formula = monthly_mean ~ year )
-fit_model(df_features, ind = 10, loc =9, formula = monthly_mean ~ month)
-fit_model(df_features, ind = 10, loc =9, formula = monthly_mean ~ m6)
+#### cross validation ####
+#dropped mod2 and only cross validaing mod1 and mod3 formulas, with and without lagged features
+fit_model_cv(df_features, ind=1,loc=1, formula = monthly_mean ~ year + month) -> mod1.cv
+fit_model_cv(df_features, ind=1,loc=1, formula = monthly_mean ~ year + month + m3+m6) -> mod3.cv
 
 
-
-
-
-
-## fitting a model with i and l as predictors
-
-lm(df_features, formula = monthly_mean ~ industry + location + monthn + year) %>% summary()
-mean(df_features$monthly_mean)
-# produced an acceptable R 2 of 0.68 but the RSE is 2.261 mil which is pretty
-# high considering that the mean of y is 1.014 mil
-
-
-
-#### 4. predict out of sample outcome #### 
-
-
+#### predict december 2016
 #create a prediciton out of sample
 predict(mod1, 
-        data.frame(year=2016, month=factor(12)), 
-        interval = "confidence")
+        data.frame(year=2016, month=factor(12)))
 
-predict(mod1, 
-        data.frame(year=2016, month=factor(12)), 
-        interval = "prediction")
+

@@ -51,6 +51,8 @@ calc_m3_m6 <- function (x, hh){
   return(x)
 }
 
+
+#### features ####
 # features: 
 # month(categorical), monthn(numerical), using both types to different
 #                                        fitting with different options on month
@@ -58,13 +60,14 @@ calc_m3_m6 <- function (x, hh){
 # lagged features for mean of past 3 and 6 months
 
 
+#### month and year features ####
 df_features <- df_agg %>% 
   mutate( year = year(date), 
           month = factor(month(date)),
           monthn = month(date)
   )
 
-
+#### lagged features #### 
 # initialise empty m3 and m6 features 
 df_features$m3 <- NA
 df_features$m6 <- NA
@@ -86,6 +89,6 @@ df_features %>% filter(industry==1, location==1) %>%
 df_features %>% filter(industry==1, location==1) %>% 
   ggplot(aes(x=date, y=monthly_mean)) + geom_line() 
 
-
+#### save featurised data set to file ####
 # save the featurised data set for use in modelling
 write_csv(df_features, "./transactions_features.csv")
