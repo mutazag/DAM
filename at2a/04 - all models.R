@@ -144,15 +144,6 @@ for (i in 1:nrow(combos)) {
 }
 
 
-#### inspect models ####
-#inspect results, look for lowest AdjR2.cv 
-mods_df %>% arrange(AdjR2.cv) %>% head(4) %>% write_csv("./worstperformance.csv")
-
-plot_monthly(df_features,7,6, T, "auto") # fitting over m3 and m6 significantly improved the performance 
-plot_monthly(df_features,3,9, T, "auto")
-plot_monthly(df_features,7,4, T, "auto")
-plot_monthly(df_features,5,10, T, "auto")
-
 
 #### predict dec 2016 for all industries and locations ####
 mods_df <- mods_df %>% mutate(monthly_mean = NA)
@@ -176,6 +167,46 @@ pred_all <- mods_df %>%
   select(date, industry, location, monthly_mean)
   
 
-
 # write to file 
 write_csv(pred_all, "./transactions_dec2016.csv")
+
+
+
+#### inspect poor performing models  ####
+
+#inspect results, look for lowest AdjR2.cv 
+mods_df %>% arrange(AdjR2.cv) %>% head(4) %>% write_csv("./worstperformance.csv")
+
+plot_monthly(df_features,7,6, T, "auto") # fitting over m3 and m6 significantly improved the performance 
+plot_monthly(df_features,3,9, T, "auto")
+plot_monthly(df_features,7,4, T, "auto")
+plot_monthly(df_features,5,10, T, "auto")
+
+#load the fitted model for i 7, l 6
+i <- which( mods_df$industry == 7 & mods_df$location == 6)
+
+mod7_6.cv <- mods_all[[52]]
+# showing very high p-value for all model coefficients
+# time to try with other model formulas 
+
+df_7_6 <- df_features %>% filter(industry == 7, location == 6)
+# plotting correlation between predictors and outcome 
+plot(df_7_6[, c("monthly_mean", "m3", "m6", "monthn", "year")])
+# testing the correlation between variables and outcome 
+cor.test(df_7_6$monthly_mean, df_7_6$m3)
+cor.test(df_7_6$monthly_mean, df_7_6$m6)
+cor.test(df_7_6$monthly_mean, df_7_6$monthn)
+cor.test(df_7_6$monthly_mean, df_7_6$year)
+
+# corr for month and year is both < 0.15
+# corr for m6 and m3  and .45 and .67,, the plot shows moderate to week positive trend
+
+#fit a model based on m3 and m6
+newmod1.cv <- fit_model_cv(df_7_6, ind = 7, loc = 6, monthly_mean ~ m3 + m6 )
+# this model has an out of sample R2 if .85
+
+summary(newmod1.cv$finalModel)
+# summary of final model is showing higher significance of the new selected coefficients
+
+# inspect the summary of fitted model mod7_6
+summary(mod7_6.cv$model$finalModel)
