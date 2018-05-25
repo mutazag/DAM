@@ -72,6 +72,16 @@ prediction_lasso = predict(cv.fit_lasso$glmnet.fit, newx = model.matrix(~ ., tes
 prediction_lasso <- as.factor(prediction_lasso)
 lasso_confusion = confusionMatrix(data = prediction_lasso, testing$Purchase)
 
+## other cv using different measures 
+cv.fit_lasso_auc <- cv.glmnet(x, y, family = 'binomial', alpha = 1, type.measure = "auc")
+plot(cv.fit_lasso_auc)
+cv.fit_lasso_auc$lambda.min %>% log()
+cv.fit_lasso_auc$lambda.1se %>% log()
+
+cv.fit_lasso_mse <- cv.glmnet(x, y, family = 'binomial', alpha = 1, type.measure = "mse")
+plot(cv.fit_lasso_mse)
+cv.fit_lasso_mse$lambda.min %>% log()
+cv.fit_lasso_mse$lambda.1se %>% log()
 ###########################
 # Evaluate the models
 
