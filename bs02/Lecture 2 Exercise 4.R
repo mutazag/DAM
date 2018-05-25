@@ -42,7 +42,7 @@ plot(cumsum(pve), type = 'b', main = "Cumulative Variance Explained",
      xlab = "Cumulative Proportion of Variance Explained",
      ylab = "Number of Components")
 
-
+# shows that PCA 2 to 3 explain between 90 to 95 of variance
 ###########################################
 # Principal Components Regression exercise
 ###########################################
@@ -57,7 +57,10 @@ pcr_fit = pcr(Salary ~ ., data = Hitters, scale = T, validation = "CV")
 summary(pcr_fit)
 # Scree plot
 validationplot(pcr_fit, val.type = "MSEP")
+validationplot(pcr_fit, val.type = "RMSEP")
+validationplot(pcr_fit, val.type = "R2")
 
+summary(pcr_fit)
 # To choose the number of components, we analyse the validation plot, 
 # as well as the % variance explained in summary(pcr.fit)
 
@@ -85,9 +88,32 @@ plot(cumsum(pve), type = 'b', main = "Cumulative Variance Explained",
 # cumsum plot shows that 10 PCAs will explain around 95% of the variablity, more than enough 
 # choose a number for the number of components
 ncomp =  7
+# fit model to predict salar 
+pcr_fit_hitters <- pcr(Salary ~ ., data = Hitters, scale = T, validatiob = "CV")
+
 # output predictions
-pcr_pred = predict(pcr_fit, Hitters, ncomp = ncomp)
+pcr_pred_hitters = predict(pcr_fit_hitters, Hitters, ncomp = ncomp)  ## <- here apply nPCA
 
 # Have a look at the relationship between predicted and actual
-plot(Hitters$Salary, pcr_pred)
+plot(Hitters$Salary, pcr_pred_hitters)
 
+# scree plots 
+validationplot(pcr_fit_hitters, val.type = "MSEP")
+validationplot(pcr_fit_hitters, val.type = "RMSEP")
+validationplot(pcr_fit_hitters, val.type = "R2")
+
+
+# clac RMSE on prediciotion ncomp =7
+caret::RMSE(pred = as.vector(pcr_pred_hitters), as.vector(Hitters$Salary), na.rm = T)
+caret::R2(pred = as.vector(pcr_pred_hitters), as.vector(Hitters$Salary), na.rm = T)
+
+# try again with low ncomp 
+pcr_pred_hitters2 = predict(pcr_fit_hitters, Hitters, ncomp = 1) 
+caret::RMSE(pred = as.vector(pcr_pred_hitters2), as.vector(Hitters$Salary), na.rm = T)
+caret::R2(pred = as.vector(pcr_pred_hitters2), as.vector(Hitters$Salary), na.rm = T)
+
+# with high pca 
+# try again with low ncomp 
+pcr_pred_hitters3 = predict(pcr_fit_hitters, Hitters, ncomp = 13) 
+caret::RMSE(pred = as.vector(pcr_pred_hitters3), as.vector(Hitters$Salary), na.rm = T)
+caret::R2(pred = as.vector(pcr_pred_hitters3), as.vector(Hitters$Salary), na.rm = T)
