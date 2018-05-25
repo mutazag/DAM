@@ -48,9 +48,10 @@ coef(cv.fit_ridge, s = cv.fit_ridge$lambda.min)
 prediction_ridge = predict(cv.fit_ridge$glmnet.fit, newx = model.matrix(~ ., testing[, -1]), 
                           type = "class",
                           s = cv.fit_ridge$lambda.min)
+prediction_ridge <- as.factor(prediction_ridge)
 
 ridge_confusion = confusionMatrix(data = prediction_ridge, testing$Purchase)
-
+ridge_confusion
 
 ###########################
 # Lasso Regression
@@ -59,7 +60,7 @@ set.seed(42)
 # alpha = 1 specifies lasso regression
 cv.fit_lasso = cv.glmnet(x, y, family = 'binomial', alpha = 1)
 
-# Results
+# Resultsc
 plot(cv.fit_lasso)
 cv.fit_lasso$lambda.min
 cv.fit_lasso$lambda.1se
@@ -68,7 +69,7 @@ coef(cv.fit_lasso, s = cv.fit_lasso$lambda.min)
 prediction_lasso = predict(cv.fit_lasso$glmnet.fit, newx = model.matrix(~ ., testing[, -1]), 
                      type = "class",
                      s = cv.fit_lasso$lambda.min)
-
+prediction_lasso <- as.factor(prediction_lasso)
 lasso_confusion = confusionMatrix(data = prediction_lasso, testing$Purchase)
 
 ###########################
