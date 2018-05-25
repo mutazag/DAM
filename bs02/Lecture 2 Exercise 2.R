@@ -12,6 +12,7 @@ install.packages("caret")
 library(caret)
 
 # Let's start by summarising our data
+library(ISLR)
 str(OJ)
 summary(OJ)
 
@@ -121,6 +122,7 @@ testing$probability = predict(OJ.glm, newdata = testing, type = "response")
 testing$prediction = "CH"
 testing[testing$probability >= 0.5, "prediction"] = "MM"
 
+testing$prediction <- as.factor(testing$prediction)
 # Have a look at the data
 head(testing)
 
@@ -151,6 +153,7 @@ OJ.glmNoStoreID = glm(formula = Purchase ~                 PriceCH + PriceMM + D
 testing$probability2 = predict(OJ.glmNoStoreID, newdata = testing, type = "response")
 testing$prediction2 = "CH"
 testing[testing$probability2 >= 0.5, "prediction2"] = "MM"
+testing$prediction2 <- as.factor(testing$prediction2)
 confusionMatrix(data = testing$prediction2, testing$Purchase)
 
 
