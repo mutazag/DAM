@@ -117,6 +117,14 @@ plot(OJSelect$StoreID, OJSelect$PctDiscCH) ## Storid is categorical, colinearity
 # add the probabilities to the testing data
 testing$probability = predict(OJ.glm, newdata = testing, type = "response")
 
+
+
+## which way to cut? 
+plot(training$Purchase, OJ.glm$fitted.values)
+plot(OJ.glm$fitted.values, training$Purchase )
+plot(OJ.glm$fitted.values, OJ.glm$y)
+unique(data.frame(OJ.glm$data$Purchase, OJ.glm$y))
+
 # assume that the optimum probability threshold is 0.5
 # Create the class prediction - our target is the "MM" class
 testing$prediction = "CH"
