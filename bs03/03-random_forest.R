@@ -44,6 +44,7 @@ typeColNum <- grep("Type",names(Glass))
 #build model
 rpart_model <- rpart(Type ~.,data = trainGlass, method="class")
 #plot tree
+library(rpart.plot)
 prp(rpart_model)
 #...and the moment of reckoning
 rpart_predict <- predict(rpart_model,testGlass[,-typeColNum],type="class")
