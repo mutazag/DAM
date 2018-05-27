@@ -1,0 +1,9 @@
+name,model.type,desc,Accuracy,Sensitivity,Precision,Recall,F1
+test1,glm,"all predictors, 0.5 probability cut",0.9731725888324874,0.9867775923221365,0.9856722327871414,0.4791666666666667,0.6448508138152412
+test2,glm,"Removed predictors that rank as low importance in previous test:  age_band,  car_model, car_segment, 
+age_of_vehicle_years , non_sched_serv_warr,  total_paid_services",0.9780456852791878,0.998669935322345,0.9791853120924643,0.22916666666666666,0.37140938727410355
+test1_na.rm,glm,Repeat test 1 after dropping records with missing values for gender and age_band,0.9908941904935349,0.9979753359101785,0.9928584508331807,0.3275862068965517,0.49263213265269523
+test2_na.rm,glm,Repeat test 2 after dropping records with missing values for gender and age_band,0.9912584228737935,1,0.9912424740010947,0.1724137931034483,0.29373601064002336
+test3,glm,"Removing all categorical variables, include age_band and gender and numerical predictors that ranked low in test1",0.9779187817258883,0.9993480075109534,0.9784240629149219,0.19981060606060605,0.3318515574920189
+test1_lowcut,glm,Same settings are test1 with 0.2 probablity cut threshold,0.9731725888324874,0.9867775923221365,0.9856722327871414,0.4791666666666667,0.6448508138152412
+test3_lowcut,glm,Same settings are test3 with 0.2 probablity cut threshold,0.9758629441624366,0.9910546630502817,0.9842523763889248,0.42424242424242425,0.5929189288287541

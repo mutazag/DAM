@@ -27,6 +27,8 @@ dff <- read_csv("./dff.csv",
 
 #### functions #### 
 
+
+# training and test using glm 
 train_test_glm <- function(formula = repurchase ~ ., 
                        train = dff_train, 
                        test = dff_test, 
@@ -96,6 +98,19 @@ train_test_glm <- function(formula = repurchase ~ .,
   
 }
 
+
+# helper function to create model summary 
+report_model <- function(model_result,desc =""){
+  obj_name <- deparse(substitute(model_result))
+  return(
+    data.frame(
+      name = obj_name,
+      model.type = model_result$model.type, 
+      desc = desc, 
+      model_result$perf
+    )
+  )
+}
 #### split ####
 
 # split 70/30 split
@@ -114,6 +129,9 @@ contrasts(dff_train$repurchase)
 # test with all variables 
 test1 <- train_test_glm()
 summary(test1$fitted.model)
+coef(test1$fitted.model)
+varImp(test1$fitted.model) -> test1_varimp
+test1$perf
 # varImp(test1$glm.fitted)
 # coef(test1$glm.fitted)
 
@@ -136,7 +154,8 @@ test2 <- train_test_glm(formula = repurchase ~
                           annualised_mileage + 
                           num_dealers_visited + 
                           num_serv_dealer_purchased)
-
+summary(test2$fitted.model)
+test2$perf
 
 #### remove na and test again ####
 # remove missing values and fit a model again 
@@ -233,3 +252,35 @@ test3_lowcut$test_confusionMatrix
 # tested glm with more configuration until reached a hig er specificity using a
 # lower cut and removing gender and age_band as they contain a very high number
 # of missing values
+
+
+
+#### models perf reports #####
+glm_full_report <- rbind(
+report_model(test1, "all predictors, 0.5 probability cut"),
+report_model(test2, "Removed predictors that rank as low importance in previous test:  age_band,  car_model, car_segment, 
+age_of_vehicle_years , non_sched_serv_warr,  total_paid_services"),
+report_model(test1_na.rm, "Repeat test 1 after dropping records with missing values for gender and age_band"),
+report_model(test2_na.rm, "Repeat test 2 after dropping records with missing values for gender and age_band"),
+report_model(test3, "Removing all categorical variables, include age_band and gender and numerical predictors that ranked low in test1"),
+report_model(test1_lowcut, "Same settings are test1 with 0.2 probablity cut threshold"),
+report_model(test3_lowcut, "Same settings are test3 with 0.2 probablity cut threshold"))
+
+write_csv(glm_full_report, "./glm_full_report.csv")
+
+
+
+#### Variables Importance #### 
+
+varImp(test1$fitted.model) -> test1_varimp
+varImp(test2$fitted.model) -> test2_varimp
+varImp(test3$fitted.model) -> test3_varimp
+
+glm_varImp <- rbind(
+cbind(varimp = test1_varimp, varName = row.names(test1_varimp), test="test1", model.type = "glm"),
+cbind(varimp = test2_varimp, varName = row.names(test2_varimp),test="test2", model.type = "glm"),
+cbind(varimp = test3_varimp, varName = row.names(test3_varimp),test="test3", model.type = "glm"))
+
+write_csv(glm_varImp, "./glm_varimp.csv")
+
+

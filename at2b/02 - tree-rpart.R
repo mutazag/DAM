@@ -31,6 +31,7 @@ dff <- read_csv("./dff.csv",
 
 #### functions  #### 
 
+# training and test using rpart 
 train_test_rpart <- function(formula = repurchase ~ ., 
                        train = dff_train, 
                        test = dff_test){
@@ -103,6 +104,19 @@ train_test_rpart <- function(formula = repurchase ~ .,
 }
 
 
+
+# helper function to create model summary 
+report_model <- function(model_result,desc =""){
+  obj_name <- deparse(substitute(model_result))
+  return(
+    data.frame(
+      name = obj_name,
+      model.type = model_result$model.type, 
+      desc = desc, 
+      model_result$perf
+    )
+  )
+}
 
 #### split ####
 
@@ -208,20 +222,10 @@ test3$test_confusionMatrix
 
 #### compare all example models ####
 
-report_model <- function(model_result,desc =""){
-  obj_name <- deparse(substitute(model_result))
-  return(
-    data.frame(
-      name = obj_name,
-      model.type = model_result$model.type, 
-      desc = desc, 
-      model_result$perf
-    )
-  )
-}
 
 
-model_results <- rbind(
+
+rpart_report <- rbind(
 report_model(test1, "all variables as predictors"),
 report_model(test2, "age and gender but not other categorical variables"),
 report_model(test3, "no categorical variables")
@@ -327,12 +331,77 @@ prune_model <- function(model_result){
 }
 
 
-
+test1_pruned <- prune_model(test1)
+prp(test1_pruned$fitted.model)
+prp(test1$fitted.model)
 test3_pruned <- prune_model(test3)
 prp(test3_pruned$fitted.model)
 prp(test3$fitted.model)
 
 prunning_report <- rbind(
+  report_model(test1, "test1 before prunning"), 
+  report_model(test1_pruned, "test1 after prunning"),
   report_model(test3, "test3 before prunning"), 
   report_model(test3_pruned, "test3 after prunning")
 )
+
+full_rpart_report <- rbind(rpart_report, prunning_report)
+
+write_csv(full_rpart_report, "./rpart_full_report.csv")
+
+
+
+
+#### variable importance ####
+
+#### Variables Importance #### 
+
+varImp(test1$fitted.model) -> test1_varimp
+varImp(test2$fitted.model) -> test2_varimp
+varImp(test3$fitted.model) -> test3_varimp
+
+rpart_varImp <- rbind(
+  cbind(varimp = test1_varimp, varName = row.names(test1_varimp), test="test1", model.type = "rpart"),
+  cbind(varimp = test2_varimp, varName = row.names(test2_varimp), test="test2", model.type = "rpart"),
+  cbind(varimp = test3_varimp, varName = row.names(test3_varimp), test="test3", model.type = "rpart"))
+
+write_csv(rpart_varImp, "./rpart_varimp.csv")
+
+
+
+
+#### predicting the validation data set using test 1 pruned model ####
+test1_pruned$test_confusionMatrix
+test1_pruned$perf
+
+
+validation_dataset <- read_csv("./data/repurchase_validation.csv",
+                               col_types = cols(
+                                 age_band = readr::col_factor(levels=age_band_levels, ordered = T), 
+                                 gender = readr::col_factor(levels=gender_levels), 
+                                 car_model = readr::col_factor(levels=NULL), 
+                                 car_segment = readr::col_factor(levels=NULL)
+                                 ))
+
+pred_class <- predict(
+  test1_pruned$fitted.model,
+  validation_dataset,
+  type="class")
+pred_prob <- predict(
+  test1_pruned$fitted.model,
+  validation_dataset,
+  type="prob")
+
+validation_dataset <- cbind(
+  validation_dataset, 
+  predicted_class = pred_class, 
+  predicted_probability = pred_prob[,"TRUE"]
+)
+
+summary(pred_class)
+# FALSE  TRUE 
+# 49269   731 
+# predicited 731 clients will repurchase 
+
+
+write_csv(validation_dataset, "./repurchase_validation-withpredictions.csv")
