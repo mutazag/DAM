@@ -6,6 +6,9 @@ library(readr)
 library(ggplot2)
 library(forcats)
 library(caret)
+library (rpart)
+library(rpart.plot)
+library(mlbench)
 
 repurchase_levels <- c(0,1)
 repurchase_labels <- c("no", "yes")
@@ -27,45 +30,47 @@ dff <- read_csv("./dff.csv",
 
 #### functions #### 
 
-train_test_glm <- function(formula = repurchase ~ ., 
+train_test_rpart <- function(formula = repurchase ~ ., 
                        train = dff_train, 
-                       test = dff_test, 
-                       cut = .5){
+                       test = dff_test){
+  
   # fit model on training data 
-  repurchase.glm <-  glm(
+
+  repurchase.rpart <-  rpart(
     formula = formula, 
     data = train, 
-    family = "binomial"
+    method = "class"
   )
   
+  train$pred_class <- predict(
+    repurchase.rpart,
+    train %>% select(-repurchase),
+    type="class")
   
-  # check classes ==> no is negative, yes is positive 
-  unique(data.frame(repurchase.glm$data$repurchase, repurchase.glm$y))
-  data.frame(repurchase.glm$data$repurchase, repurchase.glm$y, repurchase.glm$fitted.values) %>% 
-    arrange(desc(repurchase.glm$fitted.values)) %>% 
-    head(100)
-  # contrasts(dff_train$repurchase) 
-  
-   
-  ## add fitted values back into the train data set for ease of access
-  train$pred_propability <- repurchase.glm$fitted.values
-  train$pred_class <- ifelse(train$pred_propability >=  cut, TRUE, FALSE)
+  # print("Confusion Matrix on TRain Data Set")
   train_confusionMatrix <- confusionMatrix(
     data = as.factor(train$pred_class), 
     as.factor(train$repurchase))
   
   
+  #predict on test data - get class 
+  test$pred_class <- predict(
+    repurchase.rpart,
+    test %>% select(-repurchase),
+    type="class")
   
-  # predict on test data 
+  
+  # predict on test data -- probablity of both classes. the following two lines
+  # yield similar result as pred_class which can be computed directly by calling
+  # predict with type="class". this line is not necessary
   test$pred_propability <- predict(
-    repurchase.glm, 
-    newdata = test, 
-    type = "response"
-  )
+    repurchase.rpart,
+    test %>% select(-repurchase),
+    type="prob")
+  test$pred_class2 <- ifelse(as.vector(test$pred_propability[,"TRUE"]) >=  .5, TRUE, FALSE)
   
   
   # print("Confusion Matrix on Test Data Set")
-  test$pred_class <- ifelse(test$pred_propability >=  cut, TRUE, FALSE)
   test_confusionMatrix <- confusionMatrix(
     data = as.factor(test$pred_class), 
     as.factor(test$repurchase))
@@ -80,8 +85,8 @@ train_test_glm <- function(formula = repurchase ~ .,
    
   
   return(list(
-    model.type = "glm",
-    fitted.model = repurchase.glm, 
+    model.type = "rpart", 
+    fitted.model = repurchase.rpart, 
     train = train, 
     train_confusionMatrix = train_confusionMatrix, 
     test = test, 
@@ -112,15 +117,15 @@ contrasts(dff_train$repurchase)
 #### train_test with different model arch ####
 
 # test with all variables 
-test1 <- train_test_glm()
-summary(test1$fitted.model)
+test1 <- train_test_rpart()
+prp(test1$fitted.model )
 # varImp(test1$glm.fitted)
 # coef(test1$glm.fitted)
 
 
 # test without variables that were showing high p-values from
 # previous test1
-test2 <- train_test_glm(formula = repurchase ~ 
+test2 <- train_test_rpart(formula = repurchase ~ 
                           # age_band + 
                           gender + 
                           # car_model + 
@@ -146,8 +151,8 @@ dff_train_na.rm <- dff_na.rm[train_na.rm, ]
 dff_test_na.rm <- dff_na.rm[-train_na.rm, ]
 
 
-test1_na.rm <- train_test_glm(train = dff_train_na.rm, test = dff_test_na.rm)
-test2_na.rm <- train_test_glm(formula = repurchase ~ 
+test1_na.rm <- train_test_rpart(train = dff_train_na.rm, test = dff_test_na.rm)
+test2_na.rm <- train_test_rpart(formula = repurchase ~ 
                                             age_band +
                                             gender + 
                                             # car_model + 
@@ -175,7 +180,7 @@ test2_na.rm$perf
 
 # based on test2_na.rm coef, will create test3
 
-test3 <- train_test_glm(formula = repurchase ~ 
+test3 <- train_test_rpart(formula = repurchase ~ 
                           # age_band +
                           # gender + 
                           # car_model + 
@@ -195,41 +200,4 @@ test3 <- train_test_glm(formula = repurchase ~
 test3$perf
 test3$train_confusionMatrix
 test3$test_confusionMatrix
-# Reference --- this is better than the cv model as it caught more true positives and minised false negatives (missd opportunity) --- higher specifity 
-# Prediction FALSE  TRUE
-# FALSE 38320   866
-# TRUE     24   190
-summary(test3$fitted.model)
 
-
-
-
-# test1 with lower cut threshold (all vars)
-test1_lowcut <- test1 <- train_test_glm(cut =0.2)
-test1_lowcut$perf 
-test1_lowcut$test_confusionMatrix
-
-# test 3 with lower cut (less categorical variables)
-test3_lowcut <- train_test_glm(formula = repurchase ~ 
-                          # age_band +
-                          # gender + 
-                          # car_model +
-                          # car_segment +
-                          age_of_vehicle_years +
-                          # sched_serv_warr + 
-                          # non_sched_serv_warr + 
-                          sched_serv_paid + 
-                          # non_sched_serv_paid + 
-                          # total_paid_services + 
-                          total_services + 
-                          mth_since_last_serv + 
-                          annualised_mileage + 
-                          num_dealers_visited + 
-                          num_serv_dealer_purchased, 
-                          cut = 0.2) 
-test3_lowcut$perf 
-test3_lowcut$test_confusionMatrix
-
-# tested glm with more configuration until reached a hig er specificity using a
-# lower cut and removing gender and age_band as they contain a very high number
-# of missing values
