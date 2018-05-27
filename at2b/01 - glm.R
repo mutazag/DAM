@@ -37,6 +37,15 @@ train_test_glm <- function(formula = repurchase ~ .,
     data = train, 
     family = "binomial"
   )
+  
+  
+  # check classes ==> no is negative, yes is positive 
+  unique(data.frame(repurchase.glm$data$repurchase, repurchase.glm$y))
+  data.frame(repurchase.glm$data$repurchase, repurchase.glm$y, repurchase.glm$fitted.values) %>% 
+    arrange(desc(repurchase.glm$fitted.values)) %>% 
+    head(100)
+  # contrasts(dff_train$repurchase) 
+  
    
   ## add fitted values back into the train data set for ease of access
   train$pred_propability <- repurchase.glm$fitted.values
@@ -185,4 +194,41 @@ test3 <- train_test_glm(formula = repurchase ~
 test3$perf
 test3$train_confusionMatrix
 test3$test_confusionMatrix
+# Reference --- this is better than the cv model as it caught more true positives and minised false negatives (missd opportunity) --- higher specifity 
+# Prediction FALSE  TRUE
+# FALSE 38320   866
+# TRUE     24   190
 summary(test3$glm.fitted)
+
+
+
+
+# test1 with lower cut threshold (all vars)
+test1_lowcut <- test1 <- train_test_glm(cut =0.2)
+test1_lowcut$perf 
+test1_lowcut$test_confusionMatrix
+
+# test 3 with lower cut (less categorical variables)
+test3_lowcut <- train_test_glm(formula = repurchase ~ 
+                          # age_band +
+                          # gender + 
+                          # car_model +
+                          # car_segment +
+                          age_of_vehicle_years +
+                          # sched_serv_warr + 
+                          # non_sched_serv_warr + 
+                          sched_serv_paid + 
+                          # non_sched_serv_paid + 
+                          # total_paid_services + 
+                          total_services + 
+                          mth_since_last_serv + 
+                          annualised_mileage + 
+                          num_dealers_visited + 
+                          num_serv_dealer_purchased, 
+                          cut = 0.2) 
+test3_lowcut$perf 
+test3_lowcut$test_confusionMatrix
+
+# tested glm with more configuration until reached a hig er specificity using a
+# lower cut and removing gender and age_band as they contain a very high number
+# of missing values

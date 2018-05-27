@@ -63,6 +63,7 @@ dff$age_band <- ordered(dff$age_band,
 
 dff$gender <- factor(dff$gender, levels = gender_levels)
 
+
 # drop ID and Target, the variables are not needed as ID is unique to
 # observation and target is replaced with repurchase
 dff <- dff %>% select(-ID, -Target)
@@ -167,6 +168,13 @@ dff_test.cv$pred_class = predict(repurchase.glm.cv$glmnet.fit,
 #                                  newx = model.matrix(~ ., dff_test.cv %>% select(-repurchase)), 
 #                                  type = "response",
 #                                  s = repurchase.glm.cv$lambda.1se)
+
+confusionMatrix(data = as.factor(as.logical(as.integer(dff_test.cv$pred_class))), as.factor(dff_test.cv$repurchase))
+# Reference
+# Prediction FALSE  TRUE
+# FALSE 38343  1030
+# TRUE      1    26
+
 
 dff_test.cv %>% mutate(r1 = as.character(as.integer(repurchase))) %>% select(r1, pred_class) -> ddd
 ddd$r1 <- factor(ddd$r1)
