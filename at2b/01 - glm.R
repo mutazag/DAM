@@ -61,17 +61,32 @@ train_test_glm <- function(formula = repurchase ~ .,
     data = as.factor(test$pred_class), 
     as.factor(test$repurchase))
   
-   return(list(
+  
+  # store accuracy, precision, recall and F1 from test partition 
+  Accuracy <- test_confusionMatrix$overall[["Accuracy"]]
+  Sensitivity <- test_confusionMatrix$byClass[["Sensitivity"]]
+  Precision <- test_confusionMatrix$byClass[["Precision"]]
+  Recall <- test_confusionMatrix$byClass[["Specificity"]]
+  F1 <- 2 * ((Precision*Recall)/(Precision+Recall))
+   
+  
+  return(list(
     glm.fitted = repurchase.glm, 
     train = train, 
     train_confusionMatrix = train_confusionMatrix, 
     test = test, 
-    test_confusionMatrix = test_confusionMatrix
+    test_confusionMatrix = test_confusionMatrix, 
+    perf = data.frame(Accuracy, 
+                      Sensitivity, 
+                      Precision, 
+                      Recall, 
+                      F1)
   ))
   
   
 }
 
+#### split ####
 
 # split 70/30 split
 train <- createDataPartition(y = dff$repurchase, p = .7, list = F)
@@ -83,15 +98,29 @@ dff_test <- dff[-train, ]
 contrasts(dff_train$repurchase) 
 
 
-test1 <- train_test_glm()
 
-test2 <- train_test_glm(formula = repurchase ~ gender + 
-                          car_model + 
+#### train_test with different model arch ####
+
+# test with all variables 
+test1 <- train_test_glm()
+summary(test1$glm.fitted)
+# varImp(test1$glm.fitted)
+# coef(test1$glm.fitted)
+
+
+# test without variables that were showing high p-values from
+# previous test1
+test2 <- train_test_glm(formula = repurchase ~ 
+                          # age_band + 
+                          gender + 
+                          # car_model + 
+                          # car_segment + 
                           # age_of_vehicle_years +
                           sched_serv_warr + 
+                          # non_sched_serv_warr + 
                           sched_serv_paid + 
                           non_sched_serv_paid + 
-                          total_paid_services + 
+                          # total_paid_services + 
                           total_services + 
                           mth_since_last_serv + 
                           annualised_mileage + 
@@ -99,6 +128,61 @@ test2 <- train_test_glm(formula = repurchase ~ gender +
                           num_serv_dealer_purchased)
 
 
+#### remove na and test again ####
+# remove missing values and fit a model again 
+dff_na.rm <- dff %>% filter(gender != "NULL", age_band != "NULL")
+train_na.rm <- createDataPartition(y = dff_na.rm$repurchase, p = .7, list = F)
+dff_train_na.rm <- dff_na.rm[train_na.rm, ]
+dff_test_na.rm <- dff_na.rm[-train_na.rm, ]
 
 
+test1_na.rm <- train_test_glm(train = dff_train_na.rm, test = dff_test_na.rm)
+test2_na.rm <- train_test_glm(formula = repurchase ~ 
+                                            age_band +
+                                            gender + 
+                                            # car_model + 
+                                            # car_segment + 
+                                            # age_of_vehicle_years +
+                                            sched_serv_warr + 
+                                            # non_sched_serv_warr + 
+                                            sched_serv_paid + 
+                                            non_sched_serv_paid + 
+                                            # total_paid_services + 
+                                            total_services + 
+                                            mth_since_last_serv + 
+                                            annualised_mileage + 
+                                            num_dealers_visited + 
+                                            num_serv_dealer_purchased, 
+                          train = dff_train_na.rm, 
+                          test = dff_test_na.rm)
 
+
+test1$perf
+test2$perf
+test1_na.rm$perf
+test2_na.rm$perf
+
+
+# based on test2_na.rm coef, will create test3
+
+test3 <- train_test_glm(formula = repurchase ~ 
+                          # age_band +
+                          # gender + 
+                          # car_model + 
+                          # car_segment + 
+                          age_of_vehicle_years +
+                          # sched_serv_warr + 
+                          # non_sched_serv_warr + 
+                          sched_serv_paid + 
+                          # non_sched_serv_paid + 
+                          # total_paid_services + 
+                          total_services + 
+                          mth_since_last_serv + 
+                          annualised_mileage + 
+                          num_dealers_visited + 
+                          num_serv_dealer_purchased) 
+
+test3$perf
+test3$train_confusionMatrix
+test3$test_confusionMatrix
+summary(test3$glm.fitted)

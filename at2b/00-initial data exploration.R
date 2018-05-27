@@ -68,28 +68,32 @@ dff$gender <- factor(dff$gender, levels = gender_levels)
 dff <- dff %>% select(-ID, -Target)
 
 
+
+
 #### plotting categorical variables ####
 # dff %>% ggplot(aes(repurchase, age_band, color=gender)) + geom_jitter()
 
 
 
-dff %>% ggplot(aes(x=dff$age_band, fill=repurchase)) + geom_bar()
-dff %>% ggplot(aes(x=dff$age_band, fill=repurchase)) + geom_bar()
+dff %>% ggplot(aes(x=age_band, fill=repurchase)) + geom_bar()
+dff %>% filter(age_band != "NULL") %>%  ggplot(aes(age_band, fill=repurchase)) + geom_bar()
 
-dff %>% ggplot(aes(x=dff$gender, fill=repurchase)) + geom_bar()
+dff %>% ggplot(aes(x=gender, fill=repurchase)) + geom_bar()
+dff %>% filter(gender != "NULL") %>% ggplot(aes(x=gender, fill=repurchase)) + geom_bar()
 dff %>% filter(repurchase == T) %>%  ggplot(aes(gender)) + geom_bar()
 
 dff %>% ggplot(aes(car_model, fill=repurchase)) + geom_bar()
 dff %>% filter(repurchase == T) %>%  ggplot(aes(car_model)) + geom_bar()
 
 dff %>% ggplot(aes(car_segment, fill=repurchase)) + geom_bar()
-dff %>% filter(repurchase == T) %>% ggplot(aes(car_segment)) + geom_bar()
+dff %>% filter(car_segment != "Other") %>% ggplot(aes(car_segment,  fill=repurchase)) + geom_bar()
 
 #### plotting numerical variables ####
 
 plot_numerical <- function(dff,variable, label) {
   
-  dff %>% ggplot(aes(variable, fill=repurchase)) + geom_bar() + labs(y=label)
+  dff %>% ggplot(aes(variable, fill=repurchase)) + geom_bar() + labs(y=label) -> p1
+  print(p1)
   dff %>% ggplot(aes(x = repurchase, y=variable, fill=repurchase)) + geom_boxplot() + labs(y=label)
 }
 
