@@ -27,7 +27,7 @@ mean(pred_test==testset$y)
 p1 <- ggplot(data=trainset, aes(x=x1,y=x2,colour=y)) + 
   geom_point()+ scale_colour_manual(values=c("red","blue"))
 
-#identify support vectors 
+#identify support vectors --- you can get the same by looking at svm_model$SV
 df_sv <- trainset[svm_model$index,]
 
 #mark out support vectors in plot
@@ -78,3 +78,4 @@ p1 <- p1 +
 
 #display plot
 p1
+
