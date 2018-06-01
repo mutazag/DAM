@@ -54,7 +54,7 @@ nrow(df1)
 #replot dataset with margin (code is exactly same as before)
 p <- ggplot(data=df1, aes(x=x1,y=x2,colour=y)) + 
   geom_point() + scale_colour_manual(values=c("red","blue")) + 
-  geom_abline(slope=1,intercept=0)
+  geom_abline(slope=1,intercept=0) 
 p
 
 #There is a clear empty space on either side of the boundary. Let's add in boundary line on either side.
@@ -110,8 +110,9 @@ svm_model<-
 svm_model
 
 
-#Note the large number of support vectors, this is because we have set a relatively low cost for margin violation. This manifests
-#itself as a large number of datapoints lying within the margins.
+#Note the large number of support vectors, this is because we have set a
+#relatively low cost for margin violation. This manifests itself as a large
+#number of datapoints lying within the margins.
 
 
 #training accuracy
